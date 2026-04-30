@@ -14,7 +14,7 @@ from langchain_community.document_loaders import (
     TextLoader,
     GithubFileLoader,
 )
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_text_splitters import Language, RecursiveCharacterTextSplitter
 from fastapi import UploadFile
 import tempfile
 import os
@@ -54,6 +54,25 @@ CODE_EXTENSIONS = {
     "sql": "sql",
     "sh": "shell",
     "md": "markdown",
+}
+
+LANGUAGE_BY_EXT = {
+    "c": Language.C,
+    "cpp": Language.CPP,
+    "cs": Language.CSHARP,
+    "go": Language.GO,
+    "html": Language.HTML,
+    "java": Language.JAVA,
+    "js": Language.JS,
+    "jsx": Language.JS,
+    "md": Language.MARKDOWN,
+    "markdown": Language.MARKDOWN,
+    "php": Language.PHP,
+    "py": Language.PYTHON,
+    "rb": Language.RUBY,
+    "rs": Language.RUST,
+    "ts": Language.TS,
+    "tsx": Language.TS,
 }
 
 EXCLUDED_EXTENSIONS = {".json", ".lock", ".yml", ".yaml", ".gitignore", ".env"}
@@ -152,6 +171,47 @@ def _normalize_github_repo(repo_url: str) -> str:
     if len(parts) >= 2:
         return f"{parts[0]}/{parts[1]}"
     return path or cleaned
+
+
+def _get_github_repo_size_kb(repo_url: str, access_token: str | None) -> int | None:
+    """Fetch repo size from GitHub API (size is in KB)."""
+    if not repo_url or "/" not in repo_url:
+        return None
+
+    headers = {"Accept": "application/vnd.github+json"}
+    if access_token:
+        headers["Authorization"] = f"Bearer {access_token}"
+
+    try:
+        response = requests.get(
+            f"https://api.github.com/repos/{repo_url}",
+            headers=headers,
+            timeout=10,
+        )
+        if response.status_code != 200:
+            return None
+        size_kb = response.json().get("size")
+        return int(size_kb) if isinstance(size_kb, int) else None
+    except Exception:
+        return None
+
+
+def _get_language_splitter(
+    ext: str,
+    chunk_size: int,
+    chunk_overlap: int,
+) -> RecursiveCharacterTextSplitter:
+    language = LANGUAGE_BY_EXT.get(ext)
+    if language:
+        return RecursiveCharacterTextSplitter.from_language(
+            language=language,
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+        )
+    return RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+    )
 
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -357,9 +417,16 @@ def load_and_prepare_github(
             })
             enriched.append(doc)
         
+        repo_size_kb = _get_github_repo_size_kb(repo_url, access_token)
+        is_large_repo = (
+            repo_size_kb is not None
+            and repo_size_kb >= settings.GITHUB_LARGE_REPO_SIZE_KB
+        )
+
         # ── Smart splitting: large files split, small files kept whole ──
+        large_chunk_size = int(settings.CHUNK_SIZE * 1.5)
         large_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=settings.CHUNK_SIZE * 1.5,
+            chunk_size=large_chunk_size,
             chunk_overlap=0,
         )
         split_docs = []
@@ -370,7 +437,17 @@ def load_and_prepare_github(
                 split_docs.append(doc)
             else:
                 # Large files: split with larger chunks
-                chunks = large_splitter.split_documents([doc])
+                if is_large_repo:
+                    path = doc.metadata.get("path") or doc.metadata.get("source", "")
+                    ext = path.split(".")[-1].lower() if "." in path else ""
+                    splitter = _get_language_splitter(
+                        ext=ext,
+                        chunk_size=large_chunk_size,
+                        chunk_overlap=0,
+                    )
+                    chunks = splitter.split_documents([doc])
+                else:
+                    chunks = large_splitter.split_documents([doc])
                 split_docs.extend(chunks)
         
         if not split_docs:
