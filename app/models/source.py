@@ -22,12 +22,17 @@ class Source(Base):
 
     id:         Mapped[UUID]         = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid4, index=True)
     user_id:    Mapped[UUID]         = mapped_column(ForeignKey("users.id",         ondelete="CASCADE"), nullable=False)
-    session_id: Mapped[UUID]         = mapped_column(ForeignKey("chat_sessions.id", ondelete="CASCADE"), nullable=False)
+    session_id: Mapped[UUID | None]  = mapped_column(ForeignKey("chat_sessions.id", ondelete="CASCADE"), nullable=True)
     title:      Mapped[str]          = mapped_column(String, nullable=False)
     type:       Mapped[SourceType]   = mapped_column(Enum(SourceType),   nullable=False)
     status:     Mapped[SourceStatus] = mapped_column(Enum(SourceStatus), default=SourceStatus.uploaded)
     source_metadata: Mapped[dict]        = mapped_column("metadata", JSON, default=dict)
     created_at: Mapped[datetime]     = mapped_column(default=func.now())
+
+    session: Mapped["ChatSession"] = relationship(
+        "ChatSession",
+        back_populates="sources",
+    )
 
     source_index: Mapped["SourceIndex"] = relationship(
         "SourceIndex",

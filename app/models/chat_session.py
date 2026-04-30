@@ -27,5 +27,6 @@ class ChatSession(Base):
     )
     sources: Mapped[List["Source"]] = relationship(
         "Source",
+        back_populates="session",
         cascade="all, delete-orphan"
     )
