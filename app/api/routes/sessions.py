@@ -36,6 +36,7 @@ from app.utils.api_error import ApiError
 from app.utils.db_queries import verify_ownership
 from app.repositories import session_repo, source_repo
 from app.api.limiter import limiter
+from app.services.agents.pipeline import run_agent_pipeline
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 
@@ -483,22 +484,24 @@ async def send_message(
     if not content:
         raise ApiError(400, "Message content cannot be empty")
     
-    # Create user message
-    user_message = ChatMessage(
-        chat_id=session.id,
-        role=MessageRole.user,
-        content=content,
-    )
-    db.add(user_message)
-    db.commit()
-    db.refresh(user_message)
+    # Create user message via repository
+    user_message = session_repo.add_user_message(db, session.id, content)
     
-    # TODO: Run RAG pipeline asynchronously
-    # TODO: Create assistant message with response
-    # TODO: Implement streaming if needed
+    # Run RAG pipeline asynchronously
+    agent_response = await run_agent_pipeline(
+        user_id=str(current_user.id), 
+        session=session, 
+        chat_id=session.id or session_id, 
+        user_message=content,
+    )
+
+    # Create assistant message with response via repository
+    assistant_message = session_repo.add_assistant_message(db, session.id, agent_response)
+
+    # TODO: Implement streaming if needed; Also implement saving both turn messages to mem0 (manual)
     
     # Build response
-    response_data = MessageResponse.model_validate(user_message)
+    response_data = MessageResponse.model_validate(assistant_message)
     
     return ApiResponse(
         statusCode=201,

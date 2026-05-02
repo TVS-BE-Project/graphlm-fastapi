@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 
 from app.models.chat_session import ChatSession
-from app.models.chat_message import ChatMessage
+from app.models.chat_message import ChatMessage, MessageRole
 
 
 def get_session_by_id(db: Session, session_id: UUID) -> Optional[ChatSession]:
@@ -131,3 +131,55 @@ def get_message_count(db: Session, session_id: UUID) -> int:
     return db.query(func.count(ChatMessage.id)).filter(
         ChatMessage.chat_id == session_id
     ).scalar() or 0
+
+
+def add_user_message(db: Session, chat_id: UUID, content: str) -> ChatMessage:
+    """
+    Create and persist a user message in a chat session.
+
+    Args:
+        db: SQLAlchemy database session
+        chat_id: The session's UUID
+        content: Message content from user
+
+    Returns:
+        Created ChatMessage object with user role
+
+    Note:
+        This function calls db.commit() and db.refresh()
+    """
+    message = ChatMessage(
+        chat_id=chat_id,
+        role=MessageRole.user,
+        content=content,
+    )
+    db.add(message)
+    db.commit()
+    db.refresh(message)
+    return message
+
+
+def add_assistant_message(db: Session, chat_id: UUID, content: str) -> ChatMessage:
+    """
+    Create and persist an assistant message in a chat session.
+
+    Args:
+        db: SQLAlchemy database session
+        chat_id: The session's UUID
+        content: Message response from assistant/RAG pipeline
+
+    Returns:
+        Created ChatMessage object with assistant role
+
+    Note:
+        This function calls db.commit() and db.refresh()
+    """
+    message = ChatMessage(
+        chat_id=chat_id,
+        role=MessageRole.assistant,
+        content=content,
+    )
+    db.add(message)
+    db.commit()
+    db.refresh(message)
+    return message
