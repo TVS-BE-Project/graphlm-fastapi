@@ -163,7 +163,7 @@ async def get_session(
     response_data = SessionResponse.model_validate(session)
     response_data.message_count = session_repo.get_message_count(db, session.id)
     response_data.source_count = len(session.sources)
-    response_data.sources = [s.id for s in session.sources]
+    response_data.source_ids = [s.id for s in session.sources]
     
     return ApiResponse(
         statusCode=200,
@@ -297,6 +297,8 @@ async def attach_sources(
     # Build response
     response_data = SessionResponse.model_validate(session)
     response_data.message_count = session_repo.get_message_count(db, session.id)
+    response_data.source_count = len(session.sources)
+    response_data.source_ids = [s.id for s in session.sources]
     
     return ApiResponse(
         statusCode=200,

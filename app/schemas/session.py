@@ -166,7 +166,7 @@ class SessionResponse(BaseModel):
         default=None,
         description="Total number of sources attached to session (optional)"
     )
-    sources: Optional[List[UUID]] = Field(
+    source_ids: Optional[List[UUID]] = Field(
         default=None,
         description="List of attached source IDs (optional)"
     )
@@ -189,7 +189,10 @@ class SessionResponse(BaseModel):
                     }
                 ],
                 "message_count": 5,
-                "source_count": 1
+                "source_count": 1,
+                "source_ids": [
+                    "323e4567-e89b-12d3-a456-426614174002"
+                ]
             }
         }
 
