@@ -56,7 +56,7 @@ class Settings(BaseSettings):
     OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-small"
 
     # Indexing Configuration - GitHub
-    GITHUB_TOKEN: str = ""
+    GITHUB_PERSONAL_ACCESS_TOKEN: str = ""
     GITHUB_LARGE_REPO_SIZE_KB: int = 50_000
 
     # Indexing Configuration - Chunking & Concurrency

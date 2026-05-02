@@ -317,7 +317,7 @@ def load_and_prepare_github(
     repo_url = _normalize_github_repo(repo_url)
     
     if not access_token:
-        access_token = settings.GITHUB_TOKEN
+        access_token = settings.GITHUB_PERSONAL_ACCESS_TOKEN
     
     if not access_token:
         raise ApiError(400, "GitHub access token is required")
@@ -331,7 +331,7 @@ def load_and_prepare_github(
         loader = GithubFileLoader(
             repo=repo_url,
             branch=branch,
-            access_token=access_token,
+            # access_token=access_token,
             github_api_url="https://api.github.com",
             file_filter=lambda path: (
                 any(path.endswith(ext) for ext in include_ext)
