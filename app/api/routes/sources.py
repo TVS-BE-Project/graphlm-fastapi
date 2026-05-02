@@ -180,7 +180,7 @@ async def upload_document(
         logger.warning(f"Cloudinary upload failed for source {source.id} (will use local temp file): {str(e)}")
     
     # Create source index metadata via repository
-    source_index = source_repo.create_source_index(db, source.id, f"doc_{source.id}")
+    source_index = source_repo.create_source_index(db, source.id, f"{SourceType.document.value}_{source.id}")
     
     # Update status to indexing
     source_repo.update_source_status(db, source.id, SourceStatus.indexing.value)
@@ -271,7 +271,7 @@ async def add_github(
     )
     
     # Create source index metadata via repository
-    source_index = source_repo.create_source_index(db, source.id, f"github_{source.id}")
+    source_index = source_repo.create_source_index(db, source.id, f"{SourceType.github.value}_{source.id}")
     
     # Update status to indexing
     source_repo.update_source_status(db, source.id, SourceStatus.indexing.value)

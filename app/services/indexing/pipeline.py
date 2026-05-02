@@ -172,7 +172,7 @@ async def run_indexing_pipeline(source_id: str) -> None:
         # ──────────────────────────────────────────────────────────────
         vector_result = None
         try:
-            collection_name = f"src_{source_id}"
+            collection_name = f"{source_type_value}_{source_id}"
 
             # Vector indexing operates on already split docs (from ingestion)
             vector_result = await asyncio.to_thread(
