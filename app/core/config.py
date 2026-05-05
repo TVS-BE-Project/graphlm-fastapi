@@ -65,6 +65,16 @@ class Settings(BaseSettings):
     INDEXING_CONCURRENCY: int = 3
     MAX_DOCUMENT_SIZE_MB: int = 50
 
+    MODEL_MAX_TOKENS: int = 120000          # adjust per model (gpt-4o = 128K)
+    CONTEXT_SAFE_RATIO: float = 0.75         # use 75% of model max
+    CONTEXT_RESERVED_FOR_RAG: int = 15000  # headroom for vector/graph retrieval results
+    CONTEXT_RESERVED_FOR_RESPONSE: int = 5000  # headroom for agent reply
+    CONTEXT_KEEP_RECENT: int = 6            # always include last N messages verbatim
+    SEMANTIC_TOP_K: int = 15               # Qdrant candidates for semantic retrieval
+    MIN_EMBED_CHARS: int = 20              # skip embedding messages shorter than this
+
+    MEM0_API_KEY: str = ""
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

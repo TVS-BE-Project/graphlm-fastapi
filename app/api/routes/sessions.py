@@ -6,7 +6,7 @@ All endpoints require authentication (current_user).
 All endpoints return responses wrapped in ApiResponse.
 """
 
-from fastapi import APIRouter, Depends, Query, Request, HTTPException
+from fastapi import APIRouter, Depends, Query, Request, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from uuid import UUID
@@ -36,7 +36,7 @@ from app.utils.api_error import ApiError
 from app.utils.db_queries import verify_ownership
 from app.repositories import session_repo, source_repo
 from app.api.limiter import limiter
-from app.services.agents.pipeline import run_agent_pipeline
+from app.services.agents.pipeline import run_agent_pipeline, embed_turn_messages
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 
@@ -442,6 +442,7 @@ async def send_message(
     request: Request,
     session_id: UUID,
     body: SendMessageRequest,
+    background_tasks: BackgroundTasks = BackgroundTasks(),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -498,7 +499,15 @@ async def send_message(
     # Create assistant message with response via repository
     assistant_message = session_repo.add_assistant_message(db, session.id, agent_response)
 
-    # TODO: Implement streaming if needed; Also implement saving both turn messages to mem0 (manual)
+    background_tasks.add_task(
+        embed_turn_messages,
+        session_id=str(session.id),
+        user_message_id=str(user_message.id),
+        user_content=content,
+        assistant_message_id=str(assistant_message.id),
+        assistant_content=agent_response,
+    )
+
     
     # Build response
     response_data = MessageResponse.model_validate(assistant_message)

@@ -1,60 +1,196 @@
+"""
+Agent pipeline orchestrator.
+
+Responsibilities:
+  1. Resolve session sources (collection_names + source_ids)
+  2. Build context window (delegated entirely to context.py)
+  3. Run agent (delegated entirely to chat_agent.py)
+  4. Return reply string
+
+NOT responsible for:
+  - Summarization (context.py handles it)
+  - Embedding (called as BackgroundTask from the route)
+  - Memory management (agent tools handle it)
+
+Embedding:
+  embed_turn_messages is called as a FastAPI BackgroundTask from the route
+  AFTER the response is committed and returned to the user.
+  It creates its own DB session — never receives the request-scoped session.
+"""
+
+import asyncio
+from uuid import UUID
+
 from app.db.session import get_db_session
 from app.models.chat_session import ChatSession
+from app.models.source_index import SourceIndex
 from app.utils.api_error import ApiError
+
+from app.services.agents.context import build_context_window, embed_message
 from app.services.agents.chat_agent import run_agent
 
-async def run_agent_pipeline(user_id: str, session: ChatSession, chat_id: UUID, user_message: str) -> str:
-    """
-    Run the agent pipeline with the given input data.
 
-    Args:
-        user_id: The ID of the user.
-        session: The chat session.
-        chat_id: The ID of the chat.
-        user_message: The message from the user.
+# ─────────────────────────────────────────────────────────────────────────
+# Source Resolution
+# ─────────────────────────────────────────────────────────────────────────
+
+def _resolve_sources(
+    session: ChatSession,
+    db,
+) -> tuple[list[str], list[str]]:
+    """
+    Resolve Qdrant collection names and Neo4j source_ids for the session.
+
+    Rules:
+      - collection_names → sources where vector_indexed=True only
+      - source_ids       → sources where graph_indexed=True only
+
+    A source in "indexing" status (vector done, graph pending) appears in
+    vector_search but NOT graph_search — graceful degradation.
 
     Returns:
-        The output from the agent pipeline.
+        (collection_names, source_ids)
+    """
+    collection_names: list[str] = []
+    source_ids: list[str] = []
+
+    for source in session.sources:
+        index = (
+            db.query(SourceIndex)
+            .filter(SourceIndex.source_id == source.id)
+            .first()
+        )
+        if not index:
+            continue
+
+        if index.vector_indexed:
+            collection_names.append(index.collection_name)
+
+        if index.graph_indexed:
+            source_ids.append(str(source.id))
+
+    return collection_names, source_ids
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# Main Pipeline
+# ─────────────────────────────────────────────────────────────────────────
+
+async def run_agent_pipeline(
+    user_id: str,
+    session: ChatSession,
+    chat_id: UUID,
+    user_message: str,
+) -> str:
+    """
+    Full pipeline: user message → agent reply.
+
+    Steps:
+      1. Open a short-lived DB session to resolve sources + build context window
+      2. Close DB session before running the agent (agent may take seconds)
+      3. Run agent with pre-built context
+      4. Return reply
+
+    DB session is closed before agent execution — no long-held connections
+    during LLM inference time.
+
+    Args:
+        user_id:      User UUID string (scopes Mem0 memory)
+        session:      ChatSession ORM object (with .sources pre-loaded)
+        chat_id:      UUID of the chat session
+        user_message: The current user message text
+
+    Returns:
+        Agent reply string
+
+    Raises:
+        ApiError(500): On unrecoverable failure
     """
     try:
         with get_db_session() as db:
-            recent = (
-                db.query(ChatMessage)
-                .filter(ChatMessage.chat_id == chat_id)
-                .order_by(ChatMessage.created_at.desc())
-                .limit(40)
-                .all()
+            # Step 1: Resolve which sources are ready for retrieval
+            collection_names, source_ids = _resolve_sources(session, db)
+
+            # Step 2: Build context window
+            # context.py handles: DB fetch, split, summarize, semantic search
+            context_window = await build_context_window(
+                session_id=chat_id,
+                current_user_message=user_message,
+                db=db,
             )
-            recent.reverse() 
-            context_messages = [    
-                {"role": msg.role.value, "content": msg.content} for msg in recent
-            ]
-        
-        source_ids: list[str] = []
-        collection_names: list[str] = []
+        # DB session closed here — agent runs outside the connection
 
-        with get_db_session() as db:
-            for source in session.sources:
-                index = (
-                    db.query(SourceIndex)
-                    .filter(SourceIndex.source_id == source.id)
-                    .first()
-                )
-                if index and index.vector_indexed:
-                    collection_names.append(index.collection_name)
-                
-                if index and index.vector_indexed:
-                    source_ids.append(str(source.id))
-
-        response = await run_agent(
+        # Step 3: Run agent with pre-built context
+        reply = await run_agent(
             user_id=user_id,
-            messages=context_messages,
+            messages=context_window,
             collection_names=collection_names,
             source_ids=source_ids,
-            chat_id=chat_id,
+            chat_id=str(chat_id),
         )
 
-        return response 
+        return reply
+
+    except ApiError:
+        raise
     except Exception as e:
-        print(f"[Pipeline] Unexpected error in pipeline for chatSession {session.id}: {e}")
-        raise ApiError(status_code=500, detail="Internal server error")
+        print(f"[Pipeline] Unexpected error | session={chat_id} | user={user_id} | {e}")
+        raise ApiError(statusCode=500, message="Agent pipeline failed unexpectedly")
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# Background Task: Embed turn messages into Qdrant
+# ─────────────────────────────────────────────────────────────────────────
+
+async def embed_turn_messages(
+    session_id: str,
+    user_message_id: str,
+    user_content: str,
+    assistant_message_id: str,
+    assistant_content: str,
+) -> None:
+    """
+    Embed both messages from this turn into the shared Qdrant chat_messages collection.
+
+    Called as a FastAPI BackgroundTask from the route, AFTER:
+      - assistant reply is saved to DB
+      - response is returned to the user
+
+    This means embedding adds ZERO latency to the user's experience.
+
+    Creates its own DB session — NEVER receives the request-scoped session.
+    The request-scoped session may already be closed by the time this runs.
+
+    Non-fatal: Qdrant write failures are logged but do not raise. PostgreSQL
+    remains the source of truth. The next turn will simply not find these
+    messages in semantic search (graceful degradation).
+
+    Args:
+        session_id:           UUID string — stored as chat_id payload in Qdrant
+        user_message_id:      UUID string — used as Qdrant point ID
+        user_content:         User message text
+        assistant_message_id: UUID string — used as Qdrant point ID
+        assistant_content:    Assistant reply text
+    """
+    # Embed both messages concurrently — independent operations
+    results = await asyncio.gather(
+        embed_message(
+            session_id=session_id,
+            message_id=user_message_id,
+            role="user",
+            content=user_content,
+        ),
+        embed_message(
+            session_id=session_id,
+            message_id=assistant_message_id,
+            role="assistant",
+            content=assistant_content,
+        ),
+        return_exceptions=True,  # one failure must not cancel the other
+    )
+
+    # Log any exceptions (gather with return_exceptions=True swallows them)
+    for i, result in enumerate(results):
+        if isinstance(result, Exception):
+            role = "user" if i == 0 else "assistant"
+            print(f"[Pipeline] embed_turn_messages failed for {role} message: {result}")
