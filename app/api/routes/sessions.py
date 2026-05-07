@@ -43,6 +43,7 @@ from app.utils.session_utils import (
     build_session_list_response,
 )
 from app.services.agents.streaming.response_handler import stream_agent_response
+from app.services.agents.context import delete_session_messages
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 
@@ -294,16 +295,26 @@ async def detach_source_from_session(
 async def delete_session(
     request: Request,
     session_id: UUID,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     """
     Delete a chat session and all related messages.
     
-    Cascade delete removes all ChatMessage records for this session.
+    Cascade cleanup:
+    1. Delete ChatMessage records from PostgreSQL
+    2. Delete embedded messages from Qdrant (background, non-blocking)
     """
     session = await get_session_with_auth(db, session_id, current_user)
     session_repo.delete_session(db, session_id)
+    
+    # Schedule background task to clean up Qdrant (non-blocking)
+    # Runs AFTER response is returned to user (zero latency impact)
+    background_tasks.add_task(
+        delete_session_messages,
+        session_id=str(session_id),
+    )
     
     return ApiResponse(
         statusCode=200,

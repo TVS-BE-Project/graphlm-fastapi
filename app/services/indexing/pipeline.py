@@ -72,7 +72,7 @@ async def run_indexing_pipeline(source_id: str) -> None:
         # Setup: Get DB session and source record
         # ──────────────────────────────────────────────────────────────
         with get_db_session() as db:
-            source = db.query(Source).filter(Source.id == source_id).first()
+            source = source_repo.get_source_by_id(db, source_id)
 
             if not source:
                 print(f"[Pipeline] Source {source_id} not found")

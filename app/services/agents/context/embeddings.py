@@ -142,3 +142,66 @@ async def embed_message(
     except Exception as e:
         print(f"[Embeddings] embed_message failed for {message_id}: {e}")
         # Non-fatal — PostgreSQL is source of truth, Qdrant is search index only
+
+
+async def delete_session_messages(session_id: str) -> dict:
+    """
+    Delete all embedded messages for a session from the shared chat_messages collection.
+
+    Called as a FastAPI BackgroundTask when a session is deleted, AFTER:
+      - ChatMessage records deleted from PostgreSQL
+      - response is returned to the user
+
+    This mirrors embed_message() — adds ZERO latency to the user's experience.
+
+    Deletes points where metadata.chat_id matches the session_id.
+
+    Non-fatal: Qdrant failures are logged but do not raise. PostgreSQL remains
+    source of truth. Graceful degradation if Qdrant unavailable.
+
+    Args:
+        session_id: UUID string of the session to delete messages for
+
+    Returns:
+        Dict with deletion status and count:
+        {"status": "ok", "session_id": str, "deleted_count": int}
+        or
+        {"status": "error", "session_id": str, "error": str}
+    """
+    try:
+        from qdrant_client.http.models import Filter, FieldCondition, MatchValue
+
+        # Delete all points where metadata.chat_id == session_id
+        result = await asyncio.to_thread(
+            _qdrant.delete,
+            collection_name=CHAT_MESSAGES_COLLECTION,
+            points_selector={
+                "filter": Filter(
+                    must=[
+                        FieldCondition(
+                            key="chat_id",
+                            match=MatchValue(value=session_id),
+                        )
+                    ]
+                )
+            },
+        )
+
+        deleted_count = getattr(result, "deleted", 0)
+        print(
+            f"[Embeddings] Deleted {deleted_count} embedded messages for session {session_id}"
+        )
+
+        return {
+            "status": "ok",
+            "session_id": session_id,
+            "deleted_count": deleted_count,
+        }
+
+    except Exception as e:
+        print(f"[Embeddings] delete_session_messages failed for {session_id}: {e}")
+        return {
+            "status": "error",
+            "session_id": session_id,
+            "error": str(e),
+        }

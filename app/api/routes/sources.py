@@ -489,6 +489,8 @@ async def delete_source(
     
     verify_ownership(source.user_id, current_user.id, "source")
     
+    source_type_value = source.type.value if source.type else "unknown"
+
     # Clean up Cloudinary backup if it exists (optional, non-blocking)
     try:
         cloudinary_public_id = source.source_metadata.get("cloudinary_public_id") if source.source_metadata else None
@@ -503,10 +505,10 @@ async def delete_source(
     qdrant_deletion_status = None
     qdrant_error = None
     try:
-        qdrant_deletion_status = delete_qdrant_collection(f"src_{source_id}")
+        qdrant_deletion_status = delete_qdrant_collection(f"{source_type_value}_{source_id}")
     except Exception as e:
         qdrant_error = str(e)
-        qdrant_deletion_status = {"status": "error", "collection": f"src_{source_id}", "error": qdrant_error}
+        qdrant_deletion_status = {"status": "error", "collection": f"{source_type_value}_{source_id}", "error": qdrant_error}
     
     # Delete from Neo4j (graph index)
     neo4j_deletion_status = None
@@ -535,10 +537,7 @@ async def delete_source(
             errors=errors
         )
     
-    # Remove from all sessions (many-to-many cleanup)
-    source.sessions.clear()
-    db.commit()
-    
+    # Database cascade will handle join table cleanup
     # Delete source via repository (cascade deletes SourceIndex via SQLAlchemy relationship)
     source_repo.delete_source(db, source_id)
     
