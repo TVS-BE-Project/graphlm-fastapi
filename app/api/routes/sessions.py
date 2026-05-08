@@ -18,7 +18,7 @@ from app.models.user import User
 from app.models.chat_session import ChatSession
 from app.models.chat_message import ChatMessage, MessageRole
 from app.models.source import Source
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, get_current_admin
 from app.schemas.response import ApiResponse
 from app.schemas.session import (
     CreateSessionRequest,
@@ -32,6 +32,11 @@ from app.schemas.session import (
     PaginationInfo,
     GraphResponse,
     FullGraphResponse,
+    ContextStateResponse,
+    CompactionEvaluationResponse,
+    CompactionResultResponse,
+    ContextSummaryResponse,
+    ContextRebuildResponse,
 )
 from app.utils.api_error import ApiError
 from app.utils.db_queries import verify_ownership
@@ -43,7 +48,14 @@ from app.utils.session_utils import (
     build_session_list_response,
 )
 from app.services.agents.streaming.response_handler import stream_agent_response
-from app.services.agents.context import delete_session_messages
+from app.services.agents.context import (
+    delete_session_messages,
+    get_context_state,
+    evaluate_compaction,
+    compact_session_context,
+    get_context_summary,
+    rebuild_session_context,
+)
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 
@@ -607,3 +619,195 @@ async def get_full_graph(
         message="Full graph retrieved successfully",
         data=response_data,
     )
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# Context Infrastructure / Debug Endpoints
+# ─────────────────────────────────────────────────────────────────────────
+
+@router.get("/{session_id}/context/state", response_model=ApiResponse)
+@limiter.limit("20/minute")
+async def get_session_context_state(
+    request: Request,
+    session_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Get the context state of a session for debugging/observability.
+
+    Returns token usage, compaction threshold, usage percentage,
+    window size, summary status, and compaction markers.
+
+    Args:
+        session_id: Session ID
+        db: Database session
+        current_user: Authenticated user
+
+    Returns:
+        ApiResponse with ContextStateResponse
+    """
+    session = await get_session_with_auth(db, session_id, current_user)
+
+    state = await get_context_state(session_id, db)
+
+    response_data = ContextStateResponse(**state)
+
+    return ApiResponse(
+        statusCode=200,
+        success=True,
+        message="Context state retrieved successfully",
+        data=response_data,
+    )
+
+
+@router.post("/{session_id}/context/evaluate", response_model=ApiResponse)
+@limiter.limit("10/minute")
+async def evaluate_session_compaction(
+    request: Request,
+    session_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Evaluate whether compaction is needed for a session.
+
+    Estimates current token usage, compares with threshold.
+    If exceeded, marks session.needs_compaction = true.
+
+    Args:
+        session_id: Session ID
+        db: Database session
+        current_user: Authenticated user
+
+    Returns:
+        ApiResponse with CompactionEvaluationResponse
+    """
+    session = await get_session_with_auth(db, session_id, current_user)
+
+    result = await evaluate_compaction(session_id, db)
+
+    response_data = CompactionEvaluationResponse(**result)
+
+    return ApiResponse(
+        statusCode=200,
+        success=True,
+        message="Compaction evaluation completed",
+        data=response_data,
+    )
+
+
+@router.post("/{session_id}/context/compact", response_model=ApiResponse)
+@limiter.limit("5/minute")
+async def compact_session(
+    request: Request,
+    session_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Manually trigger context compaction for a session.
+
+    Workflow:
+      1. Load old messages before compact boundary
+      2. Generate/update rolling summary
+      3. Update session metadata
+      4. Preserve recent messages untouched
+
+    Reuses existing summarizer and budgeting logic.
+
+    Args:
+        session_id: Session ID
+        db: Database session
+        current_user: Authenticated user
+
+    Returns:
+        ApiResponse with CompactionResultResponse
+    """
+    session = await get_session_with_auth(db, session_id, current_user)
+
+    result = await compact_session_context(session_id, db)
+
+    response_data = CompactionResultResponse(**result)
+
+    return ApiResponse(
+        statusCode=200,
+        success=True,
+        message="Compaction completed" if result.get("compacted") else "Compaction not needed",
+        data=response_data,
+    )
+
+
+@router.get("/{session_id}/context/summary", response_model=ApiResponse)
+@limiter.limit("20/minute")
+async def get_session_context_summary(
+    request: Request,
+    session_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Get the rolling summary and metadata for a session.
+
+    Infrastructure/debug route.
+
+    Args:
+        session_id: Session ID
+        db: Database session
+        current_user: Authenticated user
+
+    Returns:
+        ApiResponse with ContextSummaryResponse
+    """
+    session = await get_session_with_auth(db, session_id, current_user)
+
+    result = await get_context_summary(session_id, db)
+
+    response_data = ContextSummaryResponse(**result)
+
+    return ApiResponse(
+        statusCode=200,
+        success=True,
+        message="Context summary retrieved successfully",
+        data=response_data,
+    )
+
+
+@router.post("/{session_id}/context/rebuild", response_model=ApiResponse)
+@limiter.limit("2/minute")
+async def rebuild_session_context_route(
+    request: Request,
+    session_id: UUID,
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_admin),
+):
+    """
+    Rebuild session context state from transcript (admin only).
+
+    Recovery/admin route. NOT used during normal operation.
+    Clears existing summary and recomputes context state from message history.
+    Requires admin privileges.
+
+    Args:
+        session_id: Session ID
+        db: Database session
+        admin_user: Authenticated admin user
+
+    Returns:
+        ApiResponse with ContextRebuildResponse
+    """
+    session = session_repo.get_session_by_id(db, session_id)
+    if not session:
+        raise ApiError(404, "Session not found")
+
+    result = await rebuild_session_context(session_id, db)
+
+    response_data = ContextRebuildResponse(**result)
+
+    return ApiResponse(
+        statusCode=200,
+        success=True,
+        message="Context rebuilt successfully",
+        data=response_data,
+    )
+

@@ -124,11 +124,22 @@ def estimate_tokens(
 def should_compact(token_estimate: dict) -> bool:
     """
     Determine if context compaction is necessary.
-    
+
+    Uses configurable threshold ratio: compaction triggers when
+    token usage exceeds threshold % of available budget.
+
     Args:
         token_estimate: Dict returned by estimate_tokens()
-    
+
     Returns:
-        True if total tokens exceed available budget
+        True if usage ratio exceeds compaction threshold
     """
-    return token_estimate["exceeded"]
+    threshold = getattr(settings, "COMPACTION_THRESHOLD", 0.85)
+    available = token_estimate["available"]
+    total = token_estimate["total"]
+
+    if available <= 0:
+        return False
+
+    usage_ratio = total / available
+    return usage_ratio >= threshold

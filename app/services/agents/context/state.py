@@ -2,49 +2,56 @@
 Conversation state management.
 
 Represents the runtime state of a chat session:
-  - rolling summary (persistent in DB)
-  - recent messages (current window)
+  - rolling summary (loaded from ChatSession, NOT ChatMessage)
+  - recent messages (windowed, O(window_size))
   - token usage (computed)
   - compaction markers
+
+Key architectural change:
+  Summary is stored on ChatSession (context control plane),
+  NOT as a role=system ChatMessage row.
 """
 
 from dataclasses import dataclass, field
 from uuid import UUID
 from sqlalchemy.orm import Session as DBSession
 
+from app.models.chat_session import ChatSession
 from app.models.chat_message import ChatMessage, MessageRole
-from app.core.config import settings
+from app.repositories import session_repo
 
 
 @dataclass
 class ConversationState:
     """
     Runtime state for a conversation session.
-    
-    Persistent state (loaded from DB):
+
+    Persistent state (loaded from ChatSession):
       - rolling_summary: Compressed history of old messages
-      - rolling_summary_message_id: DB record ID for in-place updates
-    
+      - last_compacted_message_id: Boundary marker for compaction
+      - needs_compaction: Whether session is marked for compaction
+      - recent_window_size: How many recent messages to fetch
+      - estimated_token_usage: Last known token estimate
+      - compaction_threshold: Threshold ratio for triggering compaction
+
     Transient state (computed this request):
       - recent_messages: Current recent message window
-      - older_messages_ids: IDs of messages that are "old" (eligible for compaction)
       - token_usage: Token estimate breakdown
-      - compaction_performed: Whether compaction happened this request
-      - messages_compacted_count: How many messages were summarized
     """
     session_id: UUID
-    
-    # Persistent state
+
+    # Persistent state (from ChatSession)
     rolling_summary: str | None = None
-    rolling_summary_message_id: UUID | None = None
-    
-    # Transient state
+    last_compacted_message_id: UUID | None = None
+    needs_compaction: bool = False
+    recent_window_size: int = 20
+    estimated_token_usage: int = 0
+    compaction_threshold: float = 0.85
+
+    # Transient state (computed this request)
     recent_messages: list[dict] = field(default_factory=list)
-    older_messages_ids: set[UUID] = field(default_factory=set)
     token_usage: dict = field(default_factory=dict)
-    compaction_performed: bool = False
-    messages_compacted_count: int = 0
-    
+
     @classmethod
     async def load_from_db(
         cls,
@@ -52,128 +59,132 @@ class ConversationState:
         db: DBSession,
     ) -> "ConversationState":
         """
-        Load conversation state from database.
-        
+        Load conversation state from database using windowed loading.
+
         Steps:
-          1. Fetch existing rolling summary (if any)
-          2. Fetch all user/assistant messages
-          3. Split into recent and older
-          4. Return state object
-        
+          1. Load ChatSession metadata (summary, compaction state)
+          2. Fetch ONLY recent messages after compact boundary
+          3. Return state object
+
+        Complexity: O(recent_window_size) instead of O(full_history)
+
         Args:
             session_id: Chat session UUID
             db: SQLAlchemy session
-        
+
         Returns:
             ConversationState instance
         """
-        # ── Fetch existing summary record ───────────────────────────────
-        summary_record = (
-            db.query(ChatMessage)
-            .filter(
-                ChatMessage.chat_id == session_id,
-                ChatMessage.role == MessageRole.system,
-                ChatMessage.content.like("[SUMMARY]%"),
-            )
-            .order_by(ChatMessage.created_at.desc())
-            .first()
+        # ── Load session metadata ────────────────────────────────────────
+        session = session_repo.get_session_by_id(db, session_id)
+
+        rolling_summary = None
+        last_compacted_message_id = None
+        needs_compaction = False
+        recent_window_size = 20
+        estimated_token_usage = 0
+        compaction_threshold = 0.85
+
+        if session:
+            rolling_summary = session.rolling_summary
+            last_compacted_message_id = session.last_compacted_message_id
+            needs_compaction = session.needs_compaction
+            recent_window_size = session.recent_window_size
+            estimated_token_usage = session.estimated_token_usage
+            compaction_threshold = session.compaction_threshold
+
+        # ── Fetch ONLY recent messages (windowed) ────────────────────────
+        recent_messages_db = session_repo.get_recent_messages_windowed(
+            db=db,
+            session_id=session_id,
+            last_compacted_message_id=last_compacted_message_id,
+            window_size=recent_window_size,
         )
-        
-        # ── Fetch all user/assistant messages ────────────────────────────
-        all_messages = (
-            db.query(ChatMessage)
-            .filter(
-                ChatMessage.chat_id == session_id,
-                ChatMessage.role.in_([MessageRole.user, MessageRole.assistant]),
-            )
-            .order_by(ChatMessage.created_at.asc())
-            .all()
-        )
-        
-        # ── Split into recent and older ─────────────────────────────────
-        keep_recent = settings.CONTEXT_KEEP_RECENT
-        
-        if len(all_messages) <= keep_recent:
-            older_messages_db = []
-            recent_messages_db = all_messages
-        else:
-            older_messages_db = all_messages[:-keep_recent]
-            recent_messages_db = all_messages[-keep_recent:]
-        
+
         # Convert to dict format for agent
         recent_msgs = [
             {"role": msg.role.value, "content": msg.content}
             for msg in recent_messages_db
         ]
-        
-        older_ids = {msg.id for msg in older_messages_db}
-        
+
         return cls(
             session_id=session_id,
-            rolling_summary=summary_record.content if summary_record else None,
-            rolling_summary_message_id=summary_record.id if summary_record else None,
+            rolling_summary=rolling_summary,
+            last_compacted_message_id=last_compacted_message_id,
+            needs_compaction=needs_compaction,
+            recent_window_size=recent_window_size,
+            estimated_token_usage=estimated_token_usage,
+            compaction_threshold=compaction_threshold,
             recent_messages=recent_msgs,
-            older_messages_ids=older_ids,
         )
-    
+
     def update_summary(
         self,
         new_summary: str,
         db: DBSession,
+        last_compacted_message_id: UUID | None = None,
     ) -> None:
         """
-        Update the rolling summary in the database.
-        
-        Either updates existing record in-place (if summary exists)
-        or creates a new one (if this is the first compaction).
-        
+        Update the rolling summary on the ChatSession record.
+
+        Writes to ChatSession (context control plane),
+        NOT to a ChatMessage system row.
+
         Args:
             new_summary: The new summary text
             db: SQLAlchemy session
+            last_compacted_message_id: Optional new boundary marker
         """
-        if self.rolling_summary_message_id:
-            # Update existing record in-place (no duplicate rows)
-            record = db.query(ChatMessage).get(self.rolling_summary_message_id)
-            if record:
-                record.content = new_summary
-                db.commit()
-        else:
-            # Create new summary record
-            record = ChatMessage(
-                chat_id=self.session_id,
-                role=MessageRole.system,
-                content=new_summary,
-            )
-            db.add(record)
-            db.commit()
-            self.rolling_summary_message_id = record.id
-        
+        from datetime import datetime
+
+        update_fields = {
+            "rolling_summary": new_summary,
+            "needs_compaction": False,
+            "last_compacted_at": datetime.utcnow(),
+        }
+
+        if last_compacted_message_id:
+            update_fields["last_compacted_message_id"] = last_compacted_message_id
+
+        session_repo.update_session_context_state(
+            db=db,
+            session_id=self.session_id,
+            **update_fields,
+        )
+
         self.rolling_summary = new_summary
+        self.needs_compaction = False
+        if last_compacted_message_id:
+            self.last_compacted_message_id = last_compacted_message_id
 
 
 async def load_older_messages_for_compaction(
     session_id: UUID,
-    older_ids: set[UUID],
     db: DBSession,
+    boundary_message_id: UUID | None = None,
+    after_previous_boundary_id: UUID | None = None,
 ) -> list[dict]:
     """
-    Load the full older messages for compaction/summarization.
-    
+    Load older messages for compaction/summarization.
+
+    Only called during background compaction — NOT in the hot request path.
+
     Args:
         session_id: Chat session UUID
-        older_ids: Set of message IDs that are "old"
         db: SQLAlchemy session
-    
+        boundary_message_id: Load messages up to this boundary
+        after_previous_boundary_id: Start from after this boundary (incremental)
+
     Returns:
         List of {"role": str, "content": str} dicts in chronological order
     """
-    messages = (
-        db.query(ChatMessage)
-        .filter(ChatMessage.id.in_(older_ids))
-        .order_by(ChatMessage.created_at.asc())
-        .all()
+    messages = session_repo.get_messages_before_boundary(
+        db=db,
+        session_id=session_id,
+        boundary_message_id=boundary_message_id,
+        after_previous_boundary_id=after_previous_boundary_id,
     )
-    
+
     return [
         {"role": msg.role.value, "content": msg.content}
         for msg in messages

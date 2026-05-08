@@ -183,3 +183,153 @@ def add_assistant_message(db: Session, chat_id: UUID, content: str) -> ChatMessa
     db.commit()
     db.refresh(message)
     return message
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# Context Control Plane Queries
+# ─────────────────────────────────────────────────────────────────────────
+
+def update_session_context_state(
+    db: Session,
+    session_id: UUID,
+    **kwargs,
+) -> Optional[ChatSession]:
+    """
+    Bulk-update context control plane fields on a ChatSession.
+
+    Accepts any subset of context fields as keyword arguments:
+      rolling_summary, last_compacted_message_id, needs_compaction,
+      last_compacted_at, recent_window_size, estimated_token_usage,
+      compaction_threshold
+
+    Args:
+        db: SQLAlchemy database session
+        session_id: The session's UUID
+        **kwargs: Fields to update
+
+    Returns:
+        Updated ChatSession if found, None otherwise
+    """
+    session = db.query(ChatSession).filter(ChatSession.id == session_id).first()
+    if not session:
+        return None
+
+    allowed_fields = {
+        "rolling_summary", "last_compacted_message_id", "needs_compaction",
+        "last_compacted_at", "recent_window_size", "estimated_token_usage",
+        "compaction_threshold",
+    }
+
+    for key, value in kwargs.items():
+        if key in allowed_fields:
+            setattr(session, key, value)
+
+    db.commit()
+    db.refresh(session)
+    return session
+
+
+def get_recent_messages_windowed(
+    db: Session,
+    session_id: UUID,
+    last_compacted_message_id: Optional[UUID] = None,
+    window_size: int = 20,
+) -> List[ChatMessage]:
+    """
+    Fetch only the recent message window for a session.
+
+    If last_compacted_message_id is set, fetches only messages AFTER
+    the compaction boundary. Otherwise fetches the latest N messages.
+
+    Filters to user/assistant roles only (no system messages).
+    Ordered by created_at ASC (chronological).
+
+    Complexity: O(window_size) instead of O(full_history).
+
+    Args:
+        db: SQLAlchemy database session
+        session_id: Chat session UUID
+        last_compacted_message_id: Compact boundary message ID (or None)
+        window_size: Maximum messages to return
+
+    Returns:
+        List of ChatMessage objects in chronological order
+    """
+    query = db.query(ChatMessage).filter(
+        ChatMessage.chat_id == session_id,
+        ChatMessage.role.in_([MessageRole.user, MessageRole.assistant]),
+    )
+
+    if last_compacted_message_id:
+        # Get the created_at of the boundary message
+        boundary_msg = db.query(ChatMessage.created_at).filter(
+            ChatMessage.id == last_compacted_message_id,
+        ).first()
+
+        if boundary_msg:
+            # Only fetch messages AFTER the compaction boundary
+            query = query.filter(
+                ChatMessage.created_at > boundary_msg.created_at,
+            )
+
+    # Order by newest first, limit, then reverse for chronological order
+    messages = (
+        query.order_by(ChatMessage.created_at.desc())
+        .limit(window_size)
+        .all()
+    )
+
+    # Return in chronological order (oldest first)
+    return list(reversed(messages))
+
+
+def get_messages_before_boundary(
+    db: Session,
+    session_id: UUID,
+    boundary_message_id: Optional[UUID] = None,
+    after_previous_boundary_id: Optional[UUID] = None,
+) -> List[ChatMessage]:
+    """
+    Load messages BEFORE the compact boundary for compaction.
+
+    Used only during background compaction — NOT in the hot request path.
+
+    If after_previous_boundary_id is provided, only loads messages between
+    the previous boundary and the current boundary (incremental compaction).
+
+    Args:
+        db: SQLAlchemy database session
+        session_id: Chat session UUID
+        boundary_message_id: Current compact boundary (load messages before this)
+        after_previous_boundary_id: Previous boundary (optional, for incremental)
+
+    Returns:
+        List of ChatMessage objects in chronological order
+    """
+    query = db.query(ChatMessage).filter(
+        ChatMessage.chat_id == session_id,
+        ChatMessage.role.in_([MessageRole.user, MessageRole.assistant]),
+    )
+
+    if boundary_message_id:
+        boundary_msg = db.query(ChatMessage.created_at).filter(
+            ChatMessage.id == boundary_message_id,
+        ).first()
+
+        if boundary_msg:
+            query = query.filter(
+                ChatMessage.created_at <= boundary_msg.created_at,
+            )
+
+    if after_previous_boundary_id:
+        prev_boundary_msg = db.query(ChatMessage.created_at).filter(
+            ChatMessage.id == after_previous_boundary_id,
+        ).first()
+
+        if prev_boundary_msg:
+            query = query.filter(
+                ChatMessage.created_at > prev_boundary_msg.created_at,
+            )
+
+    return query.order_by(ChatMessage.created_at.asc()).all()
+

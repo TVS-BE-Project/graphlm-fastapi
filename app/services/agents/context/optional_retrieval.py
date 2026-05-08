@@ -15,6 +15,11 @@ To enable semantic chat retrieval:
   The manager will then call retrieve_semantic_messages() after state loading
 
 Otherwise, the system runs with summary + recent only, which is fast and clean.
+
+Architecture note (post-refactor):
+  Recency re-ranking uses Qdrant payload timestamps instead of scanning
+  older_messages_db. This is compatible with the session-owned context
+  architecture where older messages are NOT loaded in the request path.
 """
 
 import asyncio
@@ -42,45 +47,31 @@ if _semantic_enabled:
     def _count_tokens(text: str) -> int:
         return len(_tokenizer.encode(text))
 
-    def _count_messages_tokens(messages: list[dict]) -> int:
-        total = 0
-        for m in messages:
-            total += _count_tokens(m.get("role", ""))
-            total += _count_tokens(m.get("content", ""))
-            total += 4
-        return total
-
     async def retrieve_semantic_messages(
         session_id_str: str,
         query: str,
         exclude_ids: set[str],
         token_budget: int,
-        older_messages_db: list,
     ) -> list[dict]:
         """
         Search the shared Qdrant collection for messages semantically related
         to the current query, scoped to this session.
-        
-        Re-ranks results by combining Qdrant similarity with recency weight:
-          score = similarity * 0.7 + recency_weight * 0.3
-        
+
+        Compatible with session-owned context architecture:
+          - Does NOT require older_messages_db (no full history scan)
+          - Uses Qdrant similarity score directly for ranking
+          - Excludes message IDs already in the recent window
+
         Args:
             session_id_str: Used in Qdrant payload filter (chat_id field)
             query: The current user message text (query vector source)
             exclude_ids: message_ids already in recent window (skip these)
             token_budget: Max tokens to spend on semantic results
-            older_messages_db: DB records for recency weighting
-        
+
         Returns:
-            List of {role, content} dicts, re-ranked and budget-capped
+            List of {role, content} dicts, ranked by similarity and budget-capped
         """
         try:
-            # Build recency index: {message_id: normalized_position}
-            total_older = len(older_messages_db)
-            recency_index: dict[str, float] = {}
-            for i, msg in enumerate(older_messages_db):
-                recency_index[str(msg.id)] = i / max(total_older - 1, 1)
-
             # Embed query
             query_vector = await asyncio.to_thread(
                 _embeddings.embed_query,
@@ -107,8 +98,10 @@ if _semantic_enabled:
                 with_payload=True,
             )
 
-            # ── Re-rank by similarity + recency ──────────────────────────
-            scored: list[tuple[float, dict]] = []
+            # ── Rank by similarity, exclude recent window, cap budget ─────
+            semantic_msgs: list[dict] = []
+            tokens_used = 0
+
             for point in results:
                 payload = point.payload or {}
                 message_id = payload.get("message_id", "")
@@ -117,27 +110,6 @@ if _semantic_enabled:
 
                 if not content or message_id in exclude_ids:
                     continue
-
-                similarity = point.score
-                recency_w = recency_index.get(message_id, 0.0)
-                combined_score = similarity * 0.7 + recency_w * 0.3
-
-                scored.append((combined_score, {
-                    "message_id": message_id,
-                    "role": role,
-                    "content": content,
-                }))
-
-            scored.sort(key=lambda x: x[0], reverse=True)
-
-            # ── Budget cap + content dedup ──────────────────────────────
-            semantic_msgs: list[dict] = []
-            tokens_used = 0
-
-            for _, candidate in scored:
-                message_id = candidate["message_id"]
-                content = candidate["content"]
-                role = candidate["role"]
 
                 # Skip if content already substantially represented
                 if any(content in m["content"] for m in semantic_msgs):
@@ -168,7 +140,6 @@ else:
         query: str,
         exclude_ids: set[str],
         token_budget: int,
-        older_messages_db: list,
     ) -> list[dict]:
         """Semantic search disabled — returns empty list."""
         return []

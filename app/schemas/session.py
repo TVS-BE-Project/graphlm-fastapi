@@ -364,3 +364,87 @@ class FullGraphResponse(BaseModel):
     )
     node_count: int = Field(description="Total nodes in result")
     edge_count: int = Field(description="Total edges in result")
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# CONTEXT INFRASTRUCTURE SCHEMAS
+# ─────────────────────────────────────────────────────────────────────────
+
+class ContextStateResponse(BaseModel):
+    """
+    Session context state for debug/observability.
+
+    Returned by GET /sessions/{id}/context/state
+    """
+    session_id: str = Field(description="Session ID")
+    estimated_token_usage: int = Field(description="Current estimated token usage")
+    available_budget: int = Field(description="Available token budget")
+    usage_percent: float = Field(description="Current usage as percentage of budget")
+    compaction_threshold: float = Field(description="Compaction trigger threshold (ratio)")
+    needs_compaction: bool = Field(description="Whether compaction is pending")
+    has_summary: bool = Field(description="Whether a rolling summary exists")
+    recent_window_size: int = Field(description="Recent message window size")
+    last_compacted_at: Optional[str] = Field(default=None, description="Last compaction timestamp")
+    last_compacted_message_id: Optional[str] = Field(default=None, description="Last compacted message boundary")
+
+
+class CompactionEvaluationResponse(BaseModel):
+    """
+    Result of compaction evaluation.
+
+    Returned by POST /sessions/{id}/context/evaluate
+    """
+    session_id: str = Field(description="Session ID")
+    estimated_tokens: int = Field(description="Estimated total tokens")
+    available_budget: int = Field(description="Available token budget")
+    usage_ratio: float = Field(description="Usage as ratio of budget (0.0-1.0)")
+    threshold: float = Field(description="Compaction threshold")
+    needs_compaction: bool = Field(description="Whether compaction is needed")
+    recent_message_count: int = Field(description="Number of recent messages")
+    summary_tokens: int = Field(description="Tokens used by rolling summary")
+    recent_tokens: int = Field(description="Tokens used by recent messages")
+
+
+class CompactionResultResponse(BaseModel):
+    """
+    Result of compaction operation.
+
+    Returned by POST /sessions/{id}/context/compact
+    """
+    session_id: str = Field(description="Session ID")
+    compacted: bool = Field(description="Whether compaction was performed")
+    reason: Optional[str] = Field(default=None, description="Reason if not compacted")
+    messages_compacted: Optional[int] = Field(default=None, description="Number of messages compacted")
+    summary_tokens: Optional[int] = Field(default=None, description="Summary token count after compaction")
+    recent_tokens: Optional[int] = Field(default=None, description="Recent message tokens after compaction")
+    total_tokens: Optional[int] = Field(default=None, description="Total tokens after compaction")
+    available_budget: Optional[int] = Field(default=None, description="Available budget")
+    headroom: Optional[int] = Field(default=None, description="Remaining headroom tokens")
+
+
+class ContextSummaryResponse(BaseModel):
+    """
+    Rolling summary and metadata.
+
+    Returned by GET /sessions/{id}/context/summary
+    """
+    session_id: str = Field(description="Session ID")
+    rolling_summary: Optional[str] = Field(default=None, description="Rolling summary text")
+    summary_tokens: int = Field(description="Token count of the summary")
+    last_compacted_at: Optional[str] = Field(default=None, description="Last compaction timestamp")
+    last_compacted_message_id: Optional[str] = Field(default=None, description="Last compacted message boundary")
+
+
+class ContextRebuildResponse(BaseModel):
+    """
+    Result of context rebuild (recovery/admin).
+
+    Returned by POST /sessions/{id}/context/rebuild
+    """
+    session_id: str = Field(description="Session ID")
+    rebuilt: bool = Field(description="Whether rebuild was performed")
+    total_messages: int = Field(description="Total messages in transcript")
+    estimated_tokens: int = Field(description="Estimated tokens after rebuild")
+    needs_compaction: bool = Field(description="Whether compaction is now needed")
+    summary_cleared: bool = Field(description="Whether previous summary was cleared")
+

@@ -18,6 +18,36 @@ from app.services.agents.streaming.event_handler import (
 )
 
 
+async def _background_compaction_check(session_id: str) -> None:
+    """
+    Background task: evaluate + compact session if needed.
+
+    Non-blocking, non-fatal. Runs after response is returned to user.
+    Creates its own DB session (request-scoped session may be closed).
+    """
+    from app.db.session import get_db_session
+    from app.services.agents.context.session_context_service import (
+        evaluate_compaction,
+        compact_session_context,
+    )
+
+    try:
+        with get_db_session() as db:
+            result = await evaluate_compaction(UUID(session_id), db)
+
+            if result.get("needs_compaction"):
+                compact_result = await compact_session_context(UUID(session_id), db)
+                print(
+                    f"[BackgroundCompaction] session={session_id} | "
+                    f"compacted={compact_result.get('compacted')} | "
+                    f"msgs={compact_result.get('messages_compacted', 0)}"
+                )
+
+    except Exception as e:
+        # Non-fatal — compaction will be retried on next evaluation
+        print(f"[BackgroundCompaction] Failed for session={session_id}: {e}")
+
+
 async def stream_agent_response(
     session_id: UUID,
     user_id: UUID,
@@ -41,7 +71,7 @@ async def stream_agent_response(
       - Runs agent pipeline in background task
       - Concurrently yields formatted SSE events
       - After streaming: persists message
-      - Schedules background task to embed both messages (non-blocking)
+      - Schedules background tasks: embeddings + compaction evaluation (non-blocking)
 
     Args:
         session_id: Chat session UUID
@@ -100,9 +130,18 @@ async def stream_agent_response(
             assistant_content=full_response.strip(),
         )
 
-        # Send completion marker immediately (no wait for Qdrant)
+        # Schedule background compaction evaluation
+        # Checks if session needs compaction and compacts if threshold exceeded
+        # Non-blocking, non-fatal (zero latency impact)
+        background_tasks.add_task(
+            _background_compaction_check,
+            session_id=str(session_id),
+        )
+
+        # Send completion marker immediately (no wait for Qdrant or compaction)
         yield format_done_event()
 
     except Exception as e:
         yield format_error_event(str(e))
         print(f"[StreamError] session={session_id} | user={user_id} | {e}")
+

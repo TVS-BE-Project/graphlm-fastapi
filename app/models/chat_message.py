@@ -28,4 +28,5 @@ class ChatMessage(Base):
     session: Mapped["ChatSession"] = relationship(
         "ChatSession",
         back_populates="messages",
+        foreign_keys="[ChatMessage.chat_id]",
     )

@@ -1,4 +1,13 @@
+from pathlib import Path
+from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Load .env into os.environ FIRST — ensures third-party libraries
+# (OpenAI Agents SDK, langchain, mem0, etc.) that read env vars
+# directly can find them. pydantic-settings reads .env too, but
+# only into its own Settings object, not into os.environ.
+_env_path = Path(__file__).resolve().parents[2] / ".env"
+load_dotenv(_env_path, override=False)  # override=False: real env vars take priority
 
 class Settings(BaseSettings):
     # Database Configuration
@@ -73,13 +82,14 @@ class Settings(BaseSettings):
     SEMANTIC_TOP_K: int = 15               # Qdrant candidates for semantic retrieval
     MIN_EMBED_CHARS: int = 20              # skip embedding messages shorter than this
     SYSTEM_PROMPT_BUDGET: int = 1_000      # token headroom for agent system prompt + tool descriptions
+    COMPACTION_THRESHOLD: float = 0.85      # trigger compaction at this % of available budget
+    COMPACTION_TARGET_RATIO: float = 0.50   # after compaction, reduce usage to this % of budget
 
     MEM0_API_KEY: str = ""
 
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
-        case_sensitive=True,
         extra="ignore",
         validate_default=True
     )

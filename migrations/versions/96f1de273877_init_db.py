@@ -55,6 +55,14 @@ def upgrade() -> None:
     sa.Column('user_id', sa.UUID(), nullable=False),
     sa.Column('title', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('rolling_summary', sa.Text(), nullable=True),
+    sa.Column('last_compacted_message_id', sa.UUID(), nullable=True),
+    sa.Column('needs_compaction', sa.Boolean(), server_default='false', nullable=False),
+    sa.Column('last_compacted_at', sa.DateTime(), nullable=True),
+    sa.Column('recent_window_size', sa.Integer(), server_default='20', nullable=False),
+    sa.Column('estimated_token_usage', sa.Integer(), server_default='0', nullable=False),
+    sa.Column('compaction_threshold', sa.Float(), server_default='0.85', nullable=False),
+    sa.ForeignKeyConstraint(['last_compacted_message_id'], ['chat_messages.id'], ondelete='SET NULL', use_alter=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
