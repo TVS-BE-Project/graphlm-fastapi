@@ -30,6 +30,7 @@ from agents import (
     MessageOutputItem,
 )
 
+from app.utils.logger import logger
 from app.core.config import settings
 from app.services.agents.tools import (
     AgentPromptContext,
@@ -290,7 +291,7 @@ async def run_agent_stream(
                         "tool_name": event.item.tool_name,
                     },
                 )
-                print(f"[Agent] Tool called: {event.item.tool_name}")
+                logger.info(f"[Agent] Tool called: {event.item.tool_name}")
 
             elif isinstance(event.item, ToolCallOutputItem):
                 # Tool returned output — emit so frontend can log/display
@@ -308,7 +309,7 @@ async def run_agent_stream(
                         "output": tool_output[:500],  # Truncate long outputs
                     },
                 )
-                print(f"[Agent] Tool output: {tool_name}")
+                logger.info(f"[Agent] Tool output: {tool_name}")
 
             elif isinstance(event.item, MessageOutputItem):
                 # Message output — skip (already in raw_response_event deltas)

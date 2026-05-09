@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from app.models.user import User
 from app.schemas.user import UserRegister
+from app.utils.logger import logger
 
 
 def get_user_by_id(db: Session, user_id: int) -> Optional[User]:
@@ -97,6 +98,7 @@ def create_user(db: Session, user_data: Union[UserRegister, dict], hashed_passwo
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    logger.info(f"Created new user: {new_user.id} ({new_user.email})")
 
     return new_user
 
@@ -145,3 +147,4 @@ def delete_user(db: Session, user: User) -> None:
     """
     db.delete(user)
     db.commit()
+    logger.info(f"Deleted user: {user.id}")

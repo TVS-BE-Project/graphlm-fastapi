@@ -13,6 +13,7 @@ import httpx
 from uuid import uuid4
 from sqlalchemy.orm import Session
 
+from app.utils.logger import logger
 from app.core.config import settings
 from app.core.security import create_access_token, create_refresh_token
 from app.core.error_codes import ErrorCodes
@@ -56,6 +57,7 @@ async def exchange_code_for_token(code: str) -> str:
 
         if not access_token:
             error_description = token_data.get("error_description", "Unknown error")
+            logger.error(f"GitHub OAuth failed: {error_description}")
             raise ApiError(
                 statusCode=400,
                 message=f"Failed to exchange code for token: {error_description}",
@@ -247,6 +249,8 @@ async def handle_github_oauth(db: Session, code: str) -> User:
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
+        
+        logger.info(f"Created new user via GitHub OAuth: {new_user.id} ({new_user.email})")
 
         return new_user
 

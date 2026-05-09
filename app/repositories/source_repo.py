@@ -20,6 +20,7 @@ from datetime import datetime
 from app.models.source import Source
 from app.models.source_index import SourceIndex
 from app.models.chat_session import ChatSession
+from app.utils.logger import logger
 
 
 def get_source_by_id(db: Session, source_id: UUID) -> Optional[Source]:
@@ -81,6 +82,7 @@ def create_source(db: Session, user_id: UUID, title: str, source_type: str, meta
     db.add(source)
     db.commit()
     db.refresh(source)
+    logger.info(f"Created new source: {source.id} of type {source_type} for user: {user_id}")
     return source
 
 
@@ -123,6 +125,7 @@ def delete_source(db: Session, source_id: UUID) -> bool:
     
     db.delete(source)
     db.commit()
+    logger.info(f"Deleted source: {source_id}")
     return True
 
 

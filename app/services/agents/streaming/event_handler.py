@@ -6,6 +6,7 @@ Consolidates event type handling and SSE response building.
 import asyncio
 import json
 from typing import AsyncGenerator, Any
+from app.utils.logger import logger
 
 
 async def process_queue_events(
@@ -123,7 +124,7 @@ async def collect_agent_chunks(
         async for event_tuple in agent_stream:
             # Validate tuple format
             if not isinstance(event_tuple, tuple) or len(event_tuple) != 2:
-                print(f"[StreamWarn] Unexpected event format: {event_tuple}")
+                logger.error(f"[StreamWarn] Unexpected event format: {event_tuple}")
                 continue
 
             event_type, event_data = event_tuple

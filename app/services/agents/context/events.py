@@ -19,6 +19,7 @@ from enum import Enum
 from typing import Optional
 from contextvars import ContextVar
 import json
+from app.utils.logger import logger
 
 # Request-scoped event queue (set by streaming endpoint)
 _event_queue: ContextVar[Optional[asyncio.Queue]] = ContextVar(
@@ -109,7 +110,7 @@ async def emit_pipeline_event(
         await queue.put(("pipeline", event_data))
     else:
         # Debug mode: just log
-        print(
+        logger.info(
             f"[PipelineEvent] {event_type.value} | "
             f"session={session_id} | "
             f"{payload or {}}"

@@ -52,8 +52,10 @@ def root():
 if __name__ == "__main__":
     import uvicorn
 
+    from app.utils.logger import logger
+
     port = settings.PORT
     host = "127.0.0.1"
 
-    print(f"🚀 Starting server on http://{host}:{port}")
+    logger.info(f"🚀 Starting server on http://{host}:{port}")
     uvicorn.run("app.main:app", host=host, port=port, reload=True)

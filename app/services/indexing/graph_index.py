@@ -24,6 +24,7 @@ from langchain_neo4j import Neo4jGraph
 
 from app.core.config import settings
 from app.utils.api_error import ApiError
+from app.utils.logger import logger
 
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -399,7 +400,7 @@ async def build_pdf_graph(source_id: str, docs: list) -> dict:
                             local_rels += 1
 
                 except Exception as e:
-                    print(f"[PDF Graph] Chunk error for source {source_id}: {e}")
+                    logger.error(f"[PDF Graph] Chunk error for source {source_id}: {e}")
 
             return local_nodes, local_rels
 
@@ -549,7 +550,7 @@ async def build_github_graph(source_id: str, docs: list) -> dict:
                             local_rels += 1
 
                 except Exception as e:
-                    print(f"[GitHub Graph] Chunk error for source {source_id}: {e}")
+                    logger.error(f"[GitHub Graph] Chunk error for source {source_id}: {e}")
 
             return local_nodes, local_rels
 

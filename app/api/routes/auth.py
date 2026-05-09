@@ -15,6 +15,7 @@ from app.api.deps import get_current_user
 from app.core.config import settings
 from app.core.error_codes import ErrorCodes
 from app.utils.api_error import ApiError
+from app.utils.logger import logger
 from ..limiter import limiter
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -553,8 +554,8 @@ async def github_oauth_initiate(
 
     import os
 
-    print("FROM SETTINGS:", settings.GITHUB_CLIENT_ID)
-    print("FROM OS ENV:", os.getenv("GITHUB_CLIENT_ID"))
+    logger.debug(f"FROM SETTINGS: {settings.GITHUB_CLIENT_ID}")
+    logger.debug(f"FROM OS ENV: {os.getenv('GITHUB_CLIENT_ID')}")
 
     # Construct GitHub OAuth URL
     github_auth_url = (

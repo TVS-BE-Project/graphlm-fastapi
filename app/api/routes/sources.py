@@ -24,9 +24,7 @@ from typing import Optional, List
 import tempfile
 import os
 import shutil
-import logging
-
-logger = logging.getLogger(__name__)
+from app.utils.logger import logger
 
 from app.db.database import get_db
 from app.models.user import User
@@ -174,7 +172,7 @@ async def upload_document(
             }
             db.commit()
             db.refresh(source)
-            print(f"[Upload] Successfully uploaded to Cloudinary: {cloudinary_result['secure_url']}")
+            logger.info(f"[Upload] Successfully uploaded to Cloudinary: {cloudinary_result['secure_url']}")
     except Exception as e:
         # Non-blocking: Cloudinary upload failure doesn't block indexing
         logger.warning(f"Cloudinary upload failed for source {source.id} (will use local temp file): {str(e)}")
@@ -496,7 +494,7 @@ async def delete_source(
         cloudinary_public_id = source.source_metadata.get("cloudinary_public_id") if source.source_metadata else None
         if cloudinary_public_id:
             delete_document_from_cloudinary(cloudinary_public_id)
-            print(f"[Delete] Cleaned up Cloudinary file for source {source_id}")
+            logger.info(f"[Delete] Cleaned up Cloudinary file for source {source_id}")
     except Exception as e:
         logger.warning(f"Failed to delete Cloudinary backup for source {source_id}: {str(e)}")
     

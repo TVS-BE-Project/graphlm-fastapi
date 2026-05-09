@@ -19,6 +19,7 @@ Key architectural change:
 from uuid import UUID
 from sqlalchemy.orm import Session as DBSession
 
+from app.utils.logger import logger
 from app.core.config import settings
 from app.repositories import session_repo
 
@@ -109,7 +110,7 @@ async def build_context_window(
         )
         state.needs_compaction = True
 
-        print(
+        logger.info(
             f"[ContextManager] session={session_id_str} | "
             f"MARKED for background compaction | "
             f"tokens={token_estimate['total']}/{token_estimate['available']} | "
@@ -160,7 +161,7 @@ async def build_context_window(
         else "none"
     )
 
-    print(
+    logger.info(
         f"[ContextManager] session={session_id_str} | "
         f"msgs={len(final_context)} | "
         f"tokens≈{token_estimate['total']}/{token_estimate['available']} | "

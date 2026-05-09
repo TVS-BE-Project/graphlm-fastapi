@@ -25,6 +25,7 @@ Architecture note (post-refactor):
 import asyncio
 from typing import Optional
 
+from app.utils.logger import logger
 from app.core.config import settings
 
 # Conditional import: only if explicitly enabled
@@ -130,7 +131,7 @@ if _semantic_enabled:
             return semantic_msgs
 
         except Exception as e:
-            print(f"[Retrieval] Semantic search failed, skipping: {e}")
+            logger.error(f"[Retrieval] Semantic search failed, skipping: {e}")
             return []
 
 else:

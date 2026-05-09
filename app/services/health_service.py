@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
+from app.utils.logger import logger
 from app.utils.api_error import ApiError
 from app.core.error_codes import ErrorCodes
 
@@ -36,6 +37,7 @@ def check_db_connection(db: Session) -> dict:
             "database": "PostgreSQL",
         }
     except Exception as e:
+        logger.error(f"Health check failed - Database connection error: {e}")
         raise ApiError(
             statusCode=503,
             message="Database connection failed",

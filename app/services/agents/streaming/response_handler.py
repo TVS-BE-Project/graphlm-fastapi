@@ -16,6 +16,7 @@ from app.services.agents.streaming.event_handler import (
     format_error_event,
     collect_agent_chunks,
 )
+from app.utils.logger import logger
 
 
 async def _background_compaction_check(session_id: str) -> None:
@@ -37,7 +38,7 @@ async def _background_compaction_check(session_id: str) -> None:
 
             if result.get("needs_compaction"):
                 compact_result = await compact_session_context(UUID(session_id), db)
-                print(
+                logger.info(
                     f"[BackgroundCompaction] session={session_id} | "
                     f"compacted={compact_result.get('compacted')} | "
                     f"msgs={compact_result.get('messages_compacted', 0)}"
@@ -45,7 +46,7 @@ async def _background_compaction_check(session_id: str) -> None:
 
     except Exception as e:
         # Non-fatal — compaction will be retried on next evaluation
-        print(f"[BackgroundCompaction] Failed for session={session_id}: {e}")
+        logger.error(f"[BackgroundCompaction] Failed for session={session_id}: {e}")
 
 
 async def stream_agent_response(
@@ -143,5 +144,5 @@ async def stream_agent_response(
 
     except Exception as e:
         yield format_error_event(str(e))
-        print(f"[StreamError] session={session_id} | user={user_id} | {e}")
+        logger.error(f"[StreamError] session={session_id} | user={user_id} | {e}")
 

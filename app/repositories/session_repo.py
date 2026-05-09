@@ -18,6 +18,7 @@ from sqlalchemy import func, desc
 
 from app.models.chat_session import ChatSession
 from app.models.chat_message import ChatMessage, MessageRole
+from app.utils.logger import logger
 
 
 def get_session_by_id(db: Session, session_id: UUID) -> Optional[ChatSession]:
@@ -72,6 +73,7 @@ def create_session(db: Session, user_id: UUID, title: str = "Untitled") -> ChatS
     db.add(session)
     db.commit()
     db.refresh(session)
+    logger.info(f"Created new chat session: {session.id} for user: {user_id}")
     return session
 
 
@@ -114,6 +116,7 @@ def delete_session(db: Session, session_id: UUID) -> bool:
     
     db.delete(session)
     db.commit()
+    logger.info(f"Deleted chat session: {session_id}")
     return True
 
 

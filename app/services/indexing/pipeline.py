@@ -38,6 +38,7 @@ from app.services.indexing.graph_index import (
 )
 from app.utils.api_error import ApiError
 from app.repositories import source_repo
+from app.utils.logger import logger
 
 
 async def run_indexing_pipeline(source_id: str) -> None:
@@ -75,14 +76,14 @@ async def run_indexing_pipeline(source_id: str) -> None:
             source = source_repo.get_source_by_id(db, source_id)
 
             if not source:
-                print(f"[Pipeline] Source {source_id} not found")
+                logger.info(f"[Pipeline] Source {source_id} not found")
                 return
 
             source_metadata = dict(source.source_metadata or {})
             source_type_value = source.type.value
             temp_dir = source_metadata.get("temp_dir")
 
-        print(f"[Pipeline] Starting indexing pipeline for source {source_id}")
+        logger.info(f"[Pipeline] Starting indexing pipeline for source {source_id}")
 
         # Update status to indexing
         with get_db_session() as db:
@@ -104,11 +105,11 @@ async def run_indexing_pipeline(source_id: str) -> None:
                 
                 if temp_file_path and os.path.exists(temp_file_path):
                     file_path = temp_file_path
-                    print(f"[Pipeline] Using temp file for source {source_id}: {temp_file_path}")
+                    logger.info(f"[Pipeline] Using temp file for source {source_id}: {temp_file_path}")
                 # FALLBACK: Use Cloudinary URL if temp file missing
                 elif source_metadata.get("cloudinary_url"):
                     file_path = source_metadata.get("cloudinary_url")
-                    print(f"[Pipeline] Temp file missing, falling back to Cloudinary for source {source_id}")
+                    logger.error(f"[Pipeline] Temp file missing, falling back to Cloudinary for source {source_id}")
                 else:
                     raise ApiError(400, "No file path or Cloudinary URL found in source metadata")
                 
@@ -124,7 +125,7 @@ async def run_indexing_pipeline(source_id: str) -> None:
                 except Exception as e:
                     # If temp file failed and we have Cloudinary as backup
                     if temp_file_path and source_metadata.get("cloudinary_url"):
-                        print(f"[Pipeline] Temp file failed ({str(e)}), retrying with Cloudinary fallback")
+                        logger.error(f"[Pipeline] Temp file failed ({str(e)}), retrying with Cloudinary fallback")
                         try:
                             docs = await asyncio.to_thread(
                                 load_and_prepare_document,
@@ -156,10 +157,10 @@ async def run_indexing_pipeline(source_id: str) -> None:
             else:
                 raise ApiError(400, f"Unsupported source type: {source.type.value}")
 
-            print(f"[Pipeline] Loaded {len(docs)} documents for source {source_id}")
+            logger.info(f"[Pipeline] Loaded {len(docs)} documents for source {source_id}")
 
         except Exception as e:
-            print(f"[Pipeline] Failed to load documents for source {source_id}: {e}")
+            logger.error(f"[Pipeline] Failed to load documents for source {source_id}: {e}")
             with get_db_session() as db:
                 db.execute(
                     update(Source).where(Source.id == source_id).values(status=SourceStatus.failed)
@@ -183,7 +184,7 @@ async def run_indexing_pipeline(source_id: str) -> None:
                 source.type.value if hasattr(source, "type") else loader_type,
             )
 
-            print(
+            logger.info(
                 f"[Pipeline] Vector indexing complete for source {source_id}: "
                 f"{vector_result.get('vectors_added', 0)} vectors"
             )
@@ -195,7 +196,7 @@ async def run_indexing_pipeline(source_id: str) -> None:
                     raise ApiError(500, "SourceIndex missing for source")
 
         except Exception as e:
-            print(f"[Pipeline] Vector indexing failed for source {source_id}: {e}")
+            logger.error(f"[Pipeline] Vector indexing failed for source {source_id}: {e}")
             with get_db_session() as db:
                 db.execute(
                     update(Source).where(Source.id == source_id).values(status=SourceStatus.failed)
@@ -212,7 +213,7 @@ async def run_indexing_pipeline(source_id: str) -> None:
             )
             db.commit()
 
-        print(f"[Pipeline] Source {source_id} marked as indexed (vector complete, chat unblocked)")
+        logger.info(f"[Pipeline] Source {source_id} marked as indexed (vector complete, chat unblocked)")
 
         # ──────────────────────────────────────────────────────────────
         # Phase 3: Graph Indexing (Async Background, Non-Fatal)
@@ -223,7 +224,7 @@ async def run_indexing_pipeline(source_id: str) -> None:
             else:
                 result = await build_pdf_graph(source_id, docs)
 
-            print(
+            logger.info(
                 f"[Pipeline] Graph indexing complete for source {source_id}: "
                 f"{result.get('nodes_added', 0)} nodes, "
                 f"{result.get('relationships_added', 0)} relationships"
@@ -241,7 +242,7 @@ async def run_indexing_pipeline(source_id: str) -> None:
 
         except Exception as e:
             # Non-fatal: log error but don't block chat
-            print(f"[Pipeline] Graph indexing failed for source {source_id} (non-fatal): {e}")
+            logger.error(f"[Pipeline] Graph indexing failed for source {source_id} (non-fatal): {e}")
             # Record graph failure information on SourceIndex for frontend visibility
             try:
                 with get_db_session() as db:
@@ -254,18 +255,18 @@ async def run_indexing_pipeline(source_id: str) -> None:
                         error_message=str(e),
                     )
             except Exception as e2:
-                print(f"[Pipeline] Failed to record graph error for source {source_id}: {e2}")
+                logger.error(f"[Pipeline] Failed to record graph error for source {source_id}: {e2}")
 
-        print(f"[Pipeline] Pipeline complete for source {source_id}")
+        logger.info(f"[Pipeline] Pipeline complete for source {source_id}")
 
     except Exception as e:
-        print(f"[Pipeline] Unexpected error in pipeline for source {source_id}: {e}")
+        logger.error(f"[Pipeline] Unexpected error in pipeline for source {source_id}: {e}")
 
     finally:
         # Cleanup temporary files
         try:
             if temp_dir and os.path.exists(temp_dir):
                 shutil.rmtree(temp_dir, ignore_errors=True)
-                print(f"[Pipeline] Cleaned up temporary directory for source {source_id}")
+                logger.info(f"[Pipeline] Cleaned up temporary directory for source {source_id}")
         except Exception as e:
-            print(f"[Pipeline] Error cleaning up temp files for source {source_id}: {e}")
+            logger.error(f"[Pipeline] Error cleaning up temp files for source {source_id}: {e}")

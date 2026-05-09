@@ -15,6 +15,7 @@ from langchain_qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams
 
+from app.utils.logger import logger
 from app.core.config import settings
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -140,7 +141,7 @@ async def embed_message(
         )
 
     except Exception as e:
-        print(f"[Embeddings] embed_message failed for {message_id}: {e}")
+        logger.error(f"[Embeddings] embed_message failed for {message_id}: {e}")
         # Non-fatal — PostgreSQL is source of truth, Qdrant is search index only
 
 
@@ -188,7 +189,7 @@ async def delete_session_messages(session_id: str) -> dict:
         )
 
         deleted_count = getattr(result, "deleted", 0)
-        print(
+        logger.info(
             f"[Embeddings] Deleted {deleted_count} embedded messages for session {session_id}"
         )
 
@@ -199,7 +200,7 @@ async def delete_session_messages(session_id: str) -> dict:
         }
 
     except Exception as e:
-        print(f"[Embeddings] delete_session_messages failed for {session_id}: {e}")
+        logger.error(f"[Embeddings] delete_session_messages failed for {session_id}: {e}")
         return {
             "status": "error",
             "session_id": session_id,

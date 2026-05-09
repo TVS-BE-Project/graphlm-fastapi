@@ -1,11 +1,9 @@
-import logging
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from pathlib import Path
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from fastapi_mail.schemas import MessageType, MultipartSubtypeEnum
+from app.utils.logger import logger
 from app.core.config import settings
-
-logger = logging.getLogger(__name__)
 
 # Setup Jinja2 environment
 TEMPLATES_DIR = Path(__file__).parent.parent / "templates"

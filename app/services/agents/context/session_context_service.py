@@ -21,6 +21,7 @@ from uuid import UUID
 from datetime import datetime
 from sqlalchemy.orm import Session as DBSession
 
+from app.utils.logger import logger
 from app.core.config import settings
 from app.repositories import session_repo
 from app.models.chat_message import ChatMessage, MessageRole
@@ -295,7 +296,7 @@ async def compact_session_context(
         estimated_token_usage=new_token_estimate["total"],
     )
 
-    print(
+    logger.info(
         f"[Compaction] session={session_id} | "
         f"compacted={len(messages_to_compact)} msgs | "
         f"summary_tokens={new_token_estimate['summary_tokens']} | "

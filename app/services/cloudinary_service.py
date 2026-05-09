@@ -5,14 +5,12 @@ Handles all Cloudinary operations including upload, deletion, and configuration.
 Provides clean abstraction for file storage operations.
 """
 
-import logging
 import cloudinary
 import cloudinary.uploader
+from app.utils.logger import logger
 from app.core.config import settings
 from app.utils.api_error import ApiError
 from app.core.error_codes import ErrorCodes
-
-logger = logging.getLogger(__name__)
 
 
 def configure_cloudinary():

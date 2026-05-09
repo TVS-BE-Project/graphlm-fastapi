@@ -39,6 +39,7 @@ from app.utils.api_error import ApiError
 
 from app.services.agents.context import build_context_window, embed_message
 from app.services.agents.chat_agent import run_agent, run_agent_stream
+from app.utils.logger import logger
 
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -145,7 +146,7 @@ async def run_agent_pipeline(
     except ApiError:
         raise
     except Exception as e:
-        print(f"[Pipeline] Unexpected error | session={chat_id} | user={user_id} | {e}")
+        logger.error(f"[Pipeline] Unexpected error | session={chat_id} | user={user_id} | {e}")
         raise ApiError(status_code=500, detail="Agent pipeline failed unexpectedly")
 
 
@@ -212,7 +213,7 @@ async def run_agent_pipeline_stream(
     except ApiError:
         raise
     except Exception as e:
-        print(f"[Pipeline] Streaming error | session={chat_id} | user={user_id} | {e}")
+        logger.error(f"[Pipeline] Streaming error | session={chat_id} | user={user_id} | {e}")
         raise ApiError(500, "Agent streaming pipeline failed unexpectedly")
 
 
@@ -271,4 +272,4 @@ async def embed_turn_messages(
     for i, result in enumerate(results):
         if isinstance(result, Exception):
             role = "user" if i == 0 else "assistant"
-            print(f"[Pipeline] embed_turn_messages failed for {role} message: {result}")
+            logger.error(f"[Pipeline] embed_turn_messages failed for {role} message: {result}")

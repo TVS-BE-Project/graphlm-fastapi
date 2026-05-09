@@ -15,7 +15,6 @@ Future utilities to integrate:
 - create_refresh_token() from app.core.security for token refresh
 """
 
-import logging
 from datetime import datetime
 from uuid import UUID
 import hashlib
@@ -25,6 +24,7 @@ from app.models.user import User
 from app.schemas.user import UserRegister, UserLogin
 from app.core.security import hash_password, verify_password, create_access_token, create_refresh_token, decode_refresh_token
 from app.services.cloudinary_service import upload_avatar_to_cloudinary, delete_avatar_from_cloudinary
+from app.utils.logger import logger
 from app.core.config import settings
 from app.utils.api_error import ApiError
 from app.core.error_codes import ErrorCodes
@@ -38,7 +38,6 @@ from app.repositories.user_repo import (
     update_user as update_user_repo,
 )
 
-logger = logging.getLogger(__name__)
 
 
 async def register_user(db: Session, user_data: UserRegister):
