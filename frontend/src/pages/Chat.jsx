@@ -1,7 +1,14 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, ArrowUp } from 'lucide-react'
+import { ArrowLeft, PanelLeftOpen, PanelRightOpen } from 'lucide-react'
 import { useChatStore } from '@/store'
+import sourceService from '@/api/sourceService'
+import { Panel, Group as PanelGroup, Separator as PanelResizeHandle } from "react-resizable-panels"
+
+// Import our new panel components
+import SourcesPanel from '@/Components/Chat/SourcesPanel'
+import ChatPanel from '@/Components/Chat/ChatPanel'
+import StudioPanel from '@/Components/Chat/StudioPanel'
 
 function Chat() {
   const { id } = useParams()
@@ -28,100 +35,170 @@ function Chat() {
       timestamp: '10:30 AM',
     },
   ])
-  const [input, setInput] = useState('')
+  
+  const [sourceProgress, setSourceProgress] = useState({})
 
-  const handleSendMessage = (e) => {
-    e.preventDefault()
-    if (!input.trim()) return
+  // Panel refs and state
+  const [isSourcesOpen, setIsSourcesOpen] = useState(true)
+  const [isStudioOpen, setIsStudioOpen] = useState(true)
 
-    const newMessage = {
-      id: Date.now().toString(),
-      text: input,
-      sender: 'user',
-      timestamp: new Date().toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
-      }),
-    }
+  // Subscribe to SSE for active indexing sources
+  useEffect(() => {
+    if (!currentSession || !currentSession.sources) return;
 
-    setMessages(prev => [...prev, newMessage])
-    setInput('')
+    const activeSources = currentSession.sources.filter(s => s.status !== 'indexed' && s.status !== 'failed');
+    if (activeSources.length === 0) return;
 
-    // Simulate assistant response
-    setTimeout(() => {
-      setMessages(prev => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          text: 'This is a placeholder response. The real assistant will respond here.',
-          sender: 'assistant',
-          timestamp: new Date().toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-          }),
+    const eventSources = [];
+
+    activeSources.forEach(source => {
+      const es = sourceService.subscribeToSourceStatus(source.id, {
+        onSnapshot: (data) => {
+          setSourceProgress(prev => ({
+            ...prev,
+            [source.id]: { vector_indexed: data.vector?.indexed || false }
+          }));
         },
-      ])
-    }, 500)
-  }
+        onIndexChanged: (data) => {
+          setSourceProgress(prev => ({
+            ...prev,
+            [source.id]: { vector_indexed: data.vector_indexed || false }
+          }));
+        },
+        onComplete: () => {
+          fetchSessions(); // Refresh session to get updated sources status
+        }
+      });
+      eventSources.push(es);
+    });
+
+    return () => {
+      eventSources.forEach(es => es.close());
+    };
+  }, [currentSession, fetchSessions]);
+
+  const isVectorIndexing = useMemo(() => {
+    if (!currentSession || !currentSession.sources) return false;
+    // Chat is disabled if any source is currently indexing and its vector is not yet indexed
+    return currentSession.sources.some(s => {
+      if (s.status === 'indexed' || s.status === 'failed') return false;
+      const progress = sourceProgress[s.id];
+      // If we haven't received a snapshot yet, assume it's indexing and block
+      if (!progress) return true;
+      return !progress.vector_indexed;
+    });
+  }, [currentSession, sourceProgress]);
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-transparent">
-      {/* Page Header */}
-      <div className="border-b border-gray-200 dark:border-gray-800/60 px-6 py-4 flex items-center gap-4">
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="flex items-center text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <h1 className="text-lg font-medium text-gray-900 dark:text-gray-200">
-          {currentSession ? currentSession.title : 'Loading session...'}
-        </h1>
+    <div className="flex h-full min-h-0 flex-col bg-[#1e1e1e]">
+      {/* Top Header - Global App Header or Session Return */}
+      <div className="border-b border-gray-800 px-4 py-3 flex items-center justify-between bg-[#1e1e1e]">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="flex items-center justify-center p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-[#2a2a2a] transition-colors"
+            title="Back to Dashboard"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          
+          <div className="flex flex-col">
+            <h1 className="text-base font-medium text-white leading-tight">
+              {currentSession?.title || 'Loading session...'}
+            </h1>
+            <span className="text-xs text-gray-400">
+              {currentSession?.sources?.length || 0} sources • {currentSession?.created_at ? new Date(currentSession.created_at).toLocaleDateString() : 'Today'}
+            </span>
+          </div>
+        </div>
       </div>
 
-      {/* Messages Area */}
-      <main className="flex-1 overflow-y-auto max-w-3xl mx-auto w-full px-4 py-8">
-        <div className="space-y-8">
-          {messages.map(msg => (
-            <div
-              key={msg.id}
-              className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+      <div className="flex-1 min-h-0 overflow-hidden flex">
+        {/* Collapsed Sources Toolbar */}
+        {!isSourcesOpen && (
+          <div className="w-16 shrink-0 h-full bg-[#1e1e1e] border-r border-gray-800 flex flex-col items-center py-3 gap-4">
+            <button
+              onClick={() => setIsSourcesOpen(true)}
+              className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-[#2a2a2a] transition-colors"
+              title="Open Sources"
             >
-              <div
-                className={`max-w-[85%] lg:max-w-2xl px-5 py-3 ${
-                  msg.sender === 'user'
-                    ? 'bg-gray-100 dark:bg-[#303134] text-gray-900 dark:text-gray-100 rounded-2xl rounded-tr-sm'
-                    : 'bg-transparent text-gray-900 dark:text-gray-100'
-                }`}
-              >
-                <p className="text-base leading-relaxed">{msg.text}</p>
-              </div>
+              <PanelLeftOpen className="w-5 h-5" />
+            </button>
+            <div className="flex flex-col gap-2 w-full px-2">
+              <button className="p-2 rounded-lg bg-[#2a2a2a] text-gray-300 hover:text-white flex items-center justify-center">
+                <span className="text-lg leading-none">+</span>
+              </button>
+              {currentSession?.sources?.map(s => (
+                <div key={s.id} className="w-full aspect-square rounded-lg bg-[#2a2a2a] flex items-center justify-center text-xs text-gray-400 cursor-pointer hover:bg-gray-700">
+                  {s.type === 'github' ? 'GH' : 'DOC'}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </main>
+          </div>
+        )}
 
-      {/* Input Area */}
-      <footer className="p-4 pt-0">
-        <form onSubmit={handleSendMessage} className="max-w-3xl mx-auto relative">
-          <input
-            type="text"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder="Message GraphLM..."
-            className="w-full px-4 py-3.5 pr-14 border border-gray-200 dark:border-gray-700/50 rounded-2xl bg-white dark:bg-[#303134] text-gray-900 dark:text-gray-100 shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-500 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400"
-          />
-          <button
-            type="submit"
-            disabled={!input.trim()}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-xl bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-50 disabled:hover:bg-gray-900 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200 dark:disabled:bg-gray-600 dark:disabled:text-gray-400 transition-colors"
-          >
-            <ArrowUp className="w-5 h-5" />
-          </button>
-        </form>
-      </footer>
+        <div className="flex-1 min-w-0">
+          <PanelGroup direction="horizontal">
+            {/* Panel 1: Sources */}
+            {isSourcesOpen && (
+              <>
+                <Panel defaultSize="20" minSize="15" maxSize="40">
+                  <SourcesPanel 
+                    currentSession={currentSession} 
+                    sourceProgress={sourceProgress} 
+                    onCollapse={() => setIsSourcesOpen(false)}
+                  />
+                </Panel>
+                <PanelResizeHandle className="w-1 bg-transparent hover:bg-blue-500/50 active:bg-blue-500 transition-colors cursor-col-resize z-10" />
+              </>
+            )}
+
+            {/* Panel 2: Chat */}
+            <Panel defaultSize="50" minSize="30">
+              <ChatPanel 
+                currentSession={currentSession}
+                messages={messages}
+                setMessages={setMessages}
+                isVectorIndexing={isVectorIndexing}
+              />
+            </Panel>
+
+            {/* Panel 3: Studio */}
+            {isStudioOpen && (
+              <>
+                <PanelResizeHandle className="w-1 bg-transparent hover:bg-blue-500/50 active:bg-blue-500 transition-colors cursor-col-resize z-10" />
+                <Panel defaultSize="30" minSize="20" maxSize="50">
+                  <StudioPanel 
+                    onCollapse={() => setIsStudioOpen(false)}
+                  />
+                </Panel>
+              </>
+            )}
+          </PanelGroup>
+        </div>
+
+        {/* Collapsed Studio Toolbar */}
+        {!isStudioOpen && (
+          <div className="w-16 shrink-0 h-full bg-[#1e1e1e] border-l border-gray-800 flex flex-col items-center py-3 gap-4">
+            <button
+              onClick={() => setIsStudioOpen(true)}
+              className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-[#2a2a2a] transition-colors"
+              title="Open Studio"
+            >
+              <PanelRightOpen className="w-5 h-5" />
+            </button>
+            <div className="flex flex-col gap-3 w-full px-2">
+               {/* Studio placeholder tools */}
+               <div className="w-full aspect-square rounded-lg bg-[#2a2a2a] flex items-center justify-center text-blue-400 cursor-pointer hover:bg-gray-700">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 3h5v5"/><path d="M21 3 9 15"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>
+               </div>
+               <div className="w-full aspect-square rounded-lg bg-[#2a2a2a] flex items-center justify-center text-green-400 cursor-pointer hover:bg-gray-700">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+               </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
