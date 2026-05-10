@@ -176,27 +176,25 @@ async def delete_session_messages(session_id: str) -> dict:
         result = await asyncio.to_thread(
             _qdrant.delete,
             collection_name=CHAT_MESSAGES_COLLECTION,
-            points_selector={
-                "filter": Filter(
-                    must=[
-                        FieldCondition(
-                            key="chat_id",
-                            match=MatchValue(value=session_id),
-                        )
-                    ]
-                )
-            },
+            points_selector=Filter(
+                must=[
+                    FieldCondition(
+                        key="chat_id",
+                        match=MatchValue(value=session_id),
+                    )
+                ]
+            ),
         )
 
-        deleted_count = getattr(result, "deleted", 0)
+        status = getattr(result, "status", "unknown")
         logger.info(
-            f"[Embeddings] Deleted {deleted_count} embedded messages for session {session_id}"
+            f"[Embeddings] Delete operation ({status}) for embedded messages in session {session_id}"
         )
 
         return {
             "status": "ok",
             "session_id": session_id,
-            "deleted_count": deleted_count,
+            "qdrant_status": str(status),
         }
 
     except Exception as e:
