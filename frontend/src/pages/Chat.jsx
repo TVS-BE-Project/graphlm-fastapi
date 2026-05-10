@@ -1,10 +1,25 @@
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ArrowUp } from 'lucide-react'
+import { useChatStore } from '@/store'
 
 function Chat() {
   const { id } = useParams()
   const navigate = useNavigate()
+  
+  const { sessions, fetchSessions } = useChatStore()
+
+  // Make sure sessions are loaded
+  useEffect(() => {
+    if (!sessions.length) {
+      fetchSessions()
+    }
+  }, [sessions.length, fetchSessions])
+
+  const currentSession = useMemo(() => {
+    return sessions.find(s => s.id === id)
+  }, [sessions, id])
+
   const [messages, setMessages] = useState([
     {
       id: '1',
@@ -52,46 +67,36 @@ function Chat() {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-gray-50 dark:bg-gray-900">
+    <div className="flex h-full min-h-0 flex-col bg-transparent">
       {/* Page Header */}
-      <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+      <div className="border-b border-gray-200 dark:border-gray-800/60 px-6 py-4 flex items-center gap-4">
         <button
           onClick={() => navigate('/dashboard')}
-          className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline mb-2"
+          className="flex items-center text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Dashboard
+          <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Chat Session: {id}
+        <h1 className="text-lg font-medium text-gray-900 dark:text-gray-200">
+          {currentSession ? currentSession.title : 'Loading session...'}
         </h1>
       </div>
 
       {/* Messages Area */}
-      <main className="flex-1 overflow-y-auto max-w-2xl mx-auto w-full px-4 py-8">
-        <div className="space-y-4">
+      <main className="flex-1 overflow-y-auto max-w-3xl mx-auto w-full px-4 py-8">
+        <div className="space-y-8">
           {messages.map(msg => (
             <div
               key={msg.id}
               className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
+                className={`max-w-[85%] lg:max-w-2xl px-5 py-3 ${
                   msg.sender === 'user'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white'
+                    ? 'bg-gray-100 dark:bg-[#303134] text-gray-900 dark:text-gray-100 rounded-2xl rounded-tr-sm'
+                    : 'bg-transparent text-gray-900 dark:text-gray-100'
                 }`}
               >
-                <p className="text-sm">{msg.text}</p>
-                <p
-                  className={`text-xs mt-1 ${
-                    msg.sender === 'user'
-                      ? 'text-blue-100'
-                      : 'text-gray-500 dark:text-gray-400'
-                  }`}
-                >
-                  {msg.timestamp}
-                </p>
+                <p className="text-base leading-relaxed">{msg.text}</p>
               </div>
             </div>
           ))}
@@ -99,20 +104,21 @@ function Chat() {
       </main>
 
       {/* Input Area */}
-      <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
-        <form onSubmit={handleSendMessage} className="max-w-2xl mx-auto flex gap-4">
+      <footer className="p-4 pt-0">
+        <form onSubmit={handleSendMessage} className="max-w-3xl mx-auto relative">
           <input
             type="text"
             value={input}
             onChange={e => setInput(e.target.value)}
-            placeholder="Type your message..."
-            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Message GraphLM..."
+            className="w-full px-4 py-3.5 pr-14 border border-gray-200 dark:border-gray-700/50 rounded-2xl bg-white dark:bg-[#303134] text-gray-900 dark:text-gray-100 shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-500 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400"
           />
           <button
             type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
+            disabled={!input.trim()}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-xl bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-50 disabled:hover:bg-gray-900 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200 dark:disabled:bg-gray-600 dark:disabled:text-gray-400 transition-colors"
           >
-            Send
+            <ArrowUp className="w-5 h-5" />
           </button>
         </form>
       </footer>

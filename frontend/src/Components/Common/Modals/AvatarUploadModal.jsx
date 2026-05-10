@@ -5,18 +5,28 @@ import userService from '@/api/userService'
 import useAuthStore from '@/store/authStore'
 
 export default function AvatarUploadModal({ open, onClose, avatarUrl, displayName }) {
+  const { user, setUser } = useAuthStore()
+  
   const [selectedFile, setSelectedFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState(null)
-  const [uploading, setUploading] = useState(false)
+  
+  const [fullname, setFullname] = useState(user?.fullname || user?.firstName || '')
+  const [username, setUsername] = useState(user?.username || '')
+  
+  const [saving, setSaving] = useState(false)
   const fileInputRef = useRef(null)
 
   useEffect(() => {
+    if (open && user) {
+      setFullname(user.fullname || user.firstName || '')
+      setUsername(user.username || '')
+    }
     if (!open) {
       setSelectedFile(null)
       setPreviewUrl(null)
-      setUploading(false)
+      setSaving(false)
     }
-  }, [open])
+  }, [open, user])
 
   useEffect(() => {
     return () => {
@@ -36,34 +46,39 @@ export default function AvatarUploadModal({ open, onClose, avatarUrl, displayNam
     handleSelectFile(file)
   }
 
-  const handleUpload = async () => {
-    if (!selectedFile) {
-      toast.error('Please choose an image to upload')
-      return
-    }
+  const handleSave = async () => {
+    setSaving(true)
+    let updatedUser = { ...user }
 
-    setUploading(true)
     try {
-      const response = await userService.uploadAvatar(selectedFile)
-      const uploadedAvatar = response?.data ?? response
-      const currentUser = useAuthStore.getState().user
-
-      if (currentUser) {
-        useAuthStore.setState({
-          user: {
-            ...currentUser,
-            avatar: uploadedAvatar,
-          },
-        })
+      // Handle Avatar Upload
+      if (selectedFile) {
+        const avatarRes = await userService.uploadAvatar(selectedFile)
+        updatedUser.avatar = avatarRes?.data ?? avatarRes
       }
 
-      toast.success('Avatar updated')
+      // Handle Profile Details Update
+      const isNameChanged = fullname !== (user.fullname || user.firstName || '')
+      const isUsernameChanged = username !== (user.username || '')
+      
+      if (isNameChanged || isUsernameChanged) {
+        const updatePayload = {}
+        if (isNameChanged) updatePayload.fullname = fullname
+        if (isUsernameChanged) updatePayload.username = username
+        
+        const profileRes = await userService.updateProfile(updatePayload)
+        const updatedProfile = profileRes?.data ?? profileRes
+        updatedUser = { ...updatedUser, ...updatedProfile }
+      }
+
+      useAuthStore.setState({ user: updatedUser })
+      toast.success('Profile updated successfully')
       onClose()
     } catch (err) {
       console.error(err)
-      toast.error(err?.response?.data?.message || 'Avatar upload failed')
+      toast.error(err?.response?.data?.message || 'Profile update failed')
     } finally {
-      setUploading(false)
+      setSaving(false)
     }
   }
 
@@ -71,9 +86,9 @@ export default function AvatarUploadModal({ open, onClose, avatarUrl, displayNam
 
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50 px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-xl">
+      <div className="w-full max-w-md rounded-2xl bg-white dark:bg-[#212121] p-6 shadow-xl">
         <div className="flex items-start justify-between">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Change profile picture</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Edit profile</h3>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
@@ -83,18 +98,18 @@ export default function AvatarUploadModal({ open, onClose, avatarUrl, displayNam
           </button>
         </div>
 
-        <div className="mt-4 flex flex-col items-center gap-4">
-          <div className="relative">
-            <div className="h-28 w-28 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">
+        <div className="mt-6 flex flex-col items-center gap-6">
+          <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+            <div className="h-24 w-24 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700 relative">
               {previewUrl ? (
                 <img src={previewUrl} alt="preview" className="h-full w-full object-cover" />
               ) : (
                 <img src={avatarUrl} alt={displayName} className="h-full w-full object-cover" />
               )}
+              <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-colors">
+                <Camera className="w-6 h-6 text-white" />
+              </div>
             </div>
-          </div>
-
-          <div className="w-full">
             <input
               ref={fileInputRef}
               type="file"
@@ -102,32 +117,53 @@ export default function AvatarUploadModal({ open, onClose, avatarUrl, displayNam
               onChange={handleFileInputChange}
               className="hidden"
             />
-
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800"
-            >
-              Upload from Device
-            </button>
           </div>
 
-          <div className="mt-2 flex w-full gap-3">
+          <div className="w-full space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Display name
+              </label>
+              <input
+                type="text"
+                value={fullname}
+                onChange={(e) => setFullname(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#171717] px-3 py-2 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Username
+              </label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#171717] px-3 py-2 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Your profile helps people recognize you in group chats.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-2 flex w-full justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-md border border-gray-200 bg-white px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+              className="rounded-full px-5 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
               Cancel
             </button>
 
             <button
               type="button"
-              onClick={handleUpload}
-              disabled={uploading}
-              className="flex-1 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-500 disabled:opacity-60 dark:bg-blue-500 dark:hover:bg-blue-400"
+              onClick={handleSave}
+              disabled={saving}
+              className="rounded-full bg-blue-600 dark:bg-white dark:text-black px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-500 disabled:opacity-60 dark:hover:bg-gray-200"
             >
-              {uploading ? 'Uploading…' : 'Save'}
+              {saving ? 'Saving...' : 'Save'}
             </button>
           </div>
         </div>
