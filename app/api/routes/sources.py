@@ -417,7 +417,26 @@ async def get_source(
     )
 
 
-@router.get("/{source_id}/status")
+@router.get(
+    "/{source_id}/status",
+    response_class=StreamingResponse,
+    responses={
+        200: {
+            "content": {
+                "text/event-stream": {
+                    "schema": {
+                        "type": "string",
+                        "description": "SSE stream containing real-time JSON event frames."
+                    }
+                }
+            },
+            "description": "Stream of real-time indexing progress updates (snapshot, source_status_changed, source_index_changed, complete).",
+        },
+        401: {"description": "Unauthorized — missing or invalid credentials."},
+        403: {"description": "Forbidden — user does not own the source."},
+        404: {"description": "Not Found — source not found."},
+    },
+)
 @limiter.limit("10/minute")
 async def get_source_status(
     request: Request,
@@ -426,27 +445,46 @@ async def get_source_status(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Stream real-time indexing status for a source via Server-Sent Events.
+    Stream real-time indexing status for a source via Server-Sent Events (SSE).
 
     The connection stays open until:
-      a) The client closes it (browser tab close, EventSource.close()).
-      b) The source reaches a terminal state: "indexed" or "failed".
+      * **The client closes it** (browser tab close, `EventSource.close()`).
+      * **The source reaches a terminal state**: `"indexed"` or `"failed"`.
 
-    Event types emitted:
-      snapshot              — Immediate first event: current DB state.
-      source_status_changed — Fired when sources.status column changes.
-      source_index_changed  — Fired when vector/graph indexed flags change.
-      complete              — Final event before the stream closes.
+    ### Event types emitted:
+    * `snapshot`              — Immediate first event: current DB state.
+    * `source_status_changed` — Fired when sources.status column changes.
+    * `source_index_changed`  — Fired when vector/graph indexed flags change.
+    * `complete`              — Final event before the stream closes.
 
-    Heartbeat comments (`: heartbeat`) are sent every 20 s to prevent
-    proxies and load balancers from closing idle connections.
+    Heartbeat comments (`: heartbeat`) are sent every 20 s to prevent proxies and load balancers from closing idle connections.
 
-    Frontend usage (JavaScript):
-        const es = new EventSource(`/sources/${id}/status`, { withCredentials: true });
-        es.addEventListener("snapshot",              e => console.log(JSON.parse(e.data)));
-        es.addEventListener("source_status_changed", e => console.log(JSON.parse(e.data)));
-        es.addEventListener("source_index_changed",  e => console.log(JSON.parse(e.data)));
-        es.addEventListener("complete",              e => { console.log(e.data); es.close(); });
+    ### Frontend Usage (JavaScript):
+    ```javascript
+    const es = new EventSource(`/sources/${id}/status`, { withCredentials: true });
+    
+    es.addEventListener("snapshot", (e) => {
+        console.log("Initial snapshot:", JSON.parse(e.data));
+    });
+    
+    es.addEventListener("source_status_changed", (e) => {
+        console.log("Overall status updated:", JSON.parse(e.data));
+    });
+    
+    es.addEventListener("source_index_changed", (e) => {
+        console.log("Index progress updated:", JSON.parse(e.data));
+    });
+    
+    es.addEventListener("complete", (e) => {
+        console.log("Indexing complete, closing SSE:", JSON.parse(e.data));
+        es.close();
+    });
+    
+    es.onerror = (err) => {
+        console.error("SSE error occurred:", err);
+        es.close();
+    };
+    ```
 
     Args:
         source_id:    Source UUID.

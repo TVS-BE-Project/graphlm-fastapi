@@ -343,7 +343,23 @@ async def delete_session(
 # Message Endpoints
 # ─────────────────────────────────────────────────────────────────────────
 
-@router.post("/{session_id}/messages", status_code=200)
+@router.post(
+    "/{session_id}/messages",
+    response_class=StreamingResponse,
+    responses={
+        200: {
+            "content": {
+                "text/event-stream": {
+                    "schema": {
+                        "type": "string",
+                        "description": "SSE stream containing real-time conversation tokens, tool calls, and pipeline status updates."
+                    }
+                }
+            },
+            "description": "Real-time stream of agent processing stages and response chunks.",
+        },
+    },
+)
 @limiter.limit("5/minute")
 async def send_message(
     request: Request,
