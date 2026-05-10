@@ -359,7 +359,7 @@ function Sidebar() {
                        {openMenuId === session.id && (
                          <div 
                            ref={sessionMenuRef}
-                           className="absolute right-8 top-full -mt-2 w-32 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#3c4043] shadow-lg py-1 z-[60] overflow-hidden"
+                           className="absolute right-8 top-full -mt-2 w-32 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#3c4043] shadow-lg py-1 z-60 overflow-hidden"
                          >
                            <button 
                              onClick={(e) => openRenameModal(e, session)}
@@ -512,7 +512,7 @@ function Sidebar() {
 
       {/* Rename / Delete Modals */}
       {modalConfig.type && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white dark:bg-[#303134] border border-gray-200 dark:border-gray-700 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
