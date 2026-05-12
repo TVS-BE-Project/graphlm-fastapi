@@ -142,7 +142,10 @@ async def stream_agent_response(
         )
 
         # Send completion marker immediately (no wait for Qdrant or compaction)
-        yield format_done_event()
+        yield format_done_event(
+            message_id=str(assistant_message.id),
+            created_at=assistant_message.created_at.isoformat() if assistant_message.created_at else None
+        )
 
     except Exception as e:
         yield format_error_event(str(e))

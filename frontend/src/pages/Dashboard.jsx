@@ -10,6 +10,8 @@ function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [viewMode, setViewMode] = useState('grid') // 'grid' or 'list'
+  const [isSelectionMode, setIsSelectionMode] = useState(false)
+  const [selectedChats, setSelectedChats] = useState([])
 
   const [openMenuId, setOpenMenuId] = useState(null)
   const [modalConfig, setModalConfig] = useState({ type: null, session: null })
@@ -92,6 +94,20 @@ function Dashboard() {
     closeModals()
   }
 
+  const confirmBulkDelete = async () => {
+    // Delete all selected chats
+    for (const id of selectedChats) {
+      await deleteSession(id)
+    }
+    setIsSelectionMode(false)
+    setSelectedChats([])
+    closeModals()
+  }
+
+  const toggleSelectChat = (id) => {
+    setSelectedChats(prev => prev.includes(id) ? prev.filter(cId => cId !== id) : [...prev, id])
+  }
+
   return (
     <div className="px-8 py-10 max-w-7xl mx-auto h-full font-sans transition-colors duration-200 flex flex-col relative">
       
@@ -117,10 +133,52 @@ function Dashboard() {
                Cancel
              </button>
           </div>
+        ) : isSelectionMode ? (
+          <div className="flex items-center gap-4 text-sm animate-in fade-in zoom-in-95 duration-200">
+            <button 
+              onClick={() => {
+                if (selectedChats.length === filteredSessions.length && filteredSessions.length > 0) {
+                  setSelectedChats([])
+                } else {
+                  setSelectedChats(filteredSessions.map(s => s.id))
+                }
+              }}
+              className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors flex items-center gap-2"
+            >
+              <input 
+                type="checkbox"
+                checked={filteredSessions.length > 0 && selectedChats.length === filteredSessions.length}
+                readOnly
+                className="rounded border-gray-300 dark:border-gray-700 text-blue-600 focus:ring-blue-500 cursor-pointer w-4 h-4"
+              />
+              Select All
+            </button>
+            {selectedChats.length > 0 && (
+              <button 
+                onClick={() => setModalConfig({ type: 'deleteBulk' })}
+                className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" /> Delete ({selectedChats.length})
+              </button>
+            )}
+            <button 
+              onClick={() => {
+                setIsSelectionMode(false)
+                setSelectedChats([])
+              }}
+              className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
         ) : (
-          <div className="flex items-center gap-6 text-sm">
-            <button className="px-4 py-1.5 rounded-full bg-blue-100 text-blue-800 dark:bg-[#3c4043] dark:text-white">All</button>
-            <button className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">My chats</button>
+          <div className="flex items-center gap-4 text-sm">
+            <button 
+              onClick={() => setIsSelectionMode(true)}
+              className="px-4 py-1.5 rounded-full bg-blue-100 text-blue-800 dark:bg-[#3c4043] dark:text-white hover:bg-blue-200 dark:hover:bg-gray-600 transition-colors font-medium"
+            >
+              Select Chats
+            </button>
           </div>
         )}
 
@@ -181,47 +239,64 @@ function Dashboard() {
             <div className="col-span-full py-12 text-center text-gray-500">Loading chats...</div>
           ) : filteredSessions.length === 0 ? (
             <div className="col-span-full py-12 text-center text-gray-500">
-              No chats found {searchQuery && 'matching your search'}.
+              No chats found {searchQuery && 'matching your search'}
             </div>
           ) : (
             filteredSessions.map(chat => (
               <div
                 key={chat.id}
-                onClick={() => handleOpenChat(chat.id)}
+                onClick={() => {
+                  if (isSelectionMode) {
+                    toggleSelectChat(chat.id)
+                  } else {
+                    handleOpenChat(chat.id)
+                  }
+                }}
                 className={`group relative flex cursor-pointer transition-all ${
                   viewMode === 'grid'
                     ? 'flex-col h-48 bg-white border border-gray-200 hover:border-gray-400 dark:bg-[#303134] rounded-2xl dark:border-transparent dark:hover:border-gray-500 p-5 shadow-sm dark:shadow-none'
                     : 'items-center gap-4 p-4 bg-white border border-gray-200 hover:border-gray-400 dark:bg-[#303134] rounded-xl dark:border-transparent dark:hover:border-gray-500 shadow-sm dark:shadow-none'
-                }`}
+                } ${isSelectionMode && selectedChats.includes(chat.id) ? 'border-blue-500 dark:border-blue-500 bg-blue-50/50 dark:bg-blue-900/20 ring-1 ring-blue-500' : ''}`}
               >
-                {/* 3-dot Menu Button */}
+                {/* 3-dot Menu Button or Checkbox */}
                 <div className={`absolute ${viewMode === 'grid' ? 'top-3 right-3' : 'top-1/2 -translate-y-1/2 right-4'} z-10`}>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === chat.id ? null : chat.id); }}
-                    className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                  >
-                    <MoreHorizontal className="w-5 h-5" />
-                  </button>
-                  
-                  {/* Dropdown Menu */}
-                  {openMenuId === chat.id && (
-                    <div 
-                      ref={menuRef}
-                      className="absolute right-0 top-full mt-1 w-40 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#3c4043] shadow-lg py-1 z-50 overflow-hidden"
-                    >
-                      <button 
-                        onClick={(e) => openRenameModal(e, chat)}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 flex items-center gap-2"
+                  {isSelectionMode ? (
+                    <input
+                      type="checkbox"
+                      checked={selectedChats.includes(chat.id)}
+                      readOnly
+                      className="w-5 h-5 rounded border-gray-300 dark:border-gray-700 text-blue-600 focus:ring-blue-500 pointer-events-none"
+                    />
+                  ) : (
+                    <>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === chat.id ? null : chat.id); }}
+                        className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                       >
-                        <Edit2 className="w-4 h-4" /> Rename
+                        <MoreHorizontal className="w-5 h-5" />
                       </button>
-                      <button 
-                        onClick={(e) => openDeleteModal(e, chat)}
-                        className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-white/10 flex items-center gap-2"
-                      >
-                        <Trash2 className="w-4 h-4" /> Delete
-                      </button>
-                    </div>
+
+                      {/* Dropdown Menu */}
+                      {openMenuId === chat.id && (
+                        <div 
+                          ref={menuRef}
+                          className="absolute right-0 top-full mt-1 w-40 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#3c4043] shadow-lg py-1 z-50 overflow-hidden"
+                        >
+                          <button 
+                            onClick={(e) => openRenameModal(e, chat)}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 flex items-center gap-2"
+                          >
+                            <Edit2 className="w-4 h-4" /> Rename
+                          </button>
+                          <button 
+                            onClick={(e) => openDeleteModal(e, chat)}
+                            className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-white/10 flex items-center gap-2"
+                          >
+                            <Trash2 className="w-4 h-4" /> Delete
+                          </button>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
 
@@ -265,7 +340,7 @@ function Dashboard() {
           <div className="bg-white dark:bg-[#303134] border border-gray-200 dark:border-gray-700 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {modalConfig.type === 'rename' ? 'Rename Chat' : 'Delete Chat'}
+                {modalConfig.type === 'rename' ? 'Rename Chat' : modalConfig.type === 'deleteBulk' ? 'Delete Selected Chats' : 'Delete Chat'}
               </h3>
               <button onClick={closeModals} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                 <X className="w-5 h-5" />
@@ -288,9 +363,13 @@ function Dashboard() {
                     placeholder="Enter chat title..."
                   />
                 </div>
+              ) : modalConfig.type === 'deleteBulk' ? (
+                <p className="text-gray-600 dark:text-gray-300">
+                  Are you sure you want to delete <span className="font-semibold text-gray-900 dark:text-white">{selectedChats.length} selected chats</span>? This action cannot be undone.
+                </p>
               ) : (
                 <p className="text-gray-600 dark:text-gray-300">
-                  Are you sure you want to delete <span className="font-semibold text-gray-900 dark:text-white">"{modalConfig.session.title}"</span>? This action cannot be undone.
+                  Are you sure you want to delete <span className="font-semibold text-gray-900 dark:text-white">"{modalConfig.session?.title}"</span>? This action cannot be undone.
                 </p>
               )}
             </div>
@@ -303,7 +382,7 @@ function Dashboard() {
                 Cancel
               </button>
               <button
-                onClick={modalConfig.type === 'rename' ? confirmRename : confirmDelete}
+                onClick={modalConfig.type === 'rename' ? confirmRename : modalConfig.type === 'deleteBulk' ? confirmBulkDelete : confirmDelete}
                 className={`px-4 py-2 rounded-lg font-medium text-sm text-white transition-colors ${
                   modalConfig.type === 'rename'
                     ? 'bg-blue-600 hover:bg-blue-700'

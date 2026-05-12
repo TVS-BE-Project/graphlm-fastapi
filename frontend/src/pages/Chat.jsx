@@ -29,7 +29,7 @@ function Chat() {
     );
   };
   
-  const { sessions, fetchSessions } = useChatStore()
+  const { sessions, fetchSessions, fetchMessages } = useChatStore()
 
   // Make sure sessions are loaded
   useEffect(() => {
@@ -38,24 +38,21 @@ function Chat() {
     }
   }, [sessions.length, fetchSessions])
 
+  useEffect(() => {
+    if (id) {
+      fetchMessages(id)
+    }
+  }, [id, fetchMessages])
+
   const currentSession = useMemo(() => {
     return sessions.find(s => s.id === id)
   }, [sessions, id])
-
-  const [messages, setMessages] = useState([
-    {
-      id: '1',
-      text: 'Hello! How can I help you with your knowledge graph?',
-      sender: 'assistant',
-      timestamp: '10:30 AM',
-    },
-  ])
   
   const [sourceProgress, setSourceProgress] = useState({})
 
   // Panel refs and state
   const [isSourcesOpen, setIsSourcesOpen] = useState(true)
-  const [isStudioOpen, setIsStudioOpen] = useState(false)
+  const [isStudioOpen, setIsStudioOpen] = useState(true)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
   const handleOpenSource = (source) => {
@@ -225,8 +222,6 @@ function Chat() {
             <Panel defaultSize="50" minSize="30">
               <ChatPanel 
                 currentSession={currentSession}
-                messages={messages}
-                setMessages={setMessages}
                 isVectorIndexing={isVectorIndexing}
               />
             </Panel>

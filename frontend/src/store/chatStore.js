@@ -7,10 +7,13 @@ const useChatStore = create((set, get) => ({
   sessions: [],
   currentSession: null,
   messages: [],
+  hasMoreMessages: false,
+  messagesSkip: 0,
+  isFetchingMore: false,
   
   // Streaming states
   isStreaming: false,
-  streamingMessage: null,
+  abortController: null,
   
   // Loading states
   isLoadingSessions: false,
@@ -18,6 +21,17 @@ const useChatStore = create((set, get) => ({
   isCreatingSession: false,
   
   error: null,
+
+  stopStreaming: () => {
+    const controller = get().abortController;
+    if (controller) {
+      controller.abort();
+    }
+    set({
+      isStreaming: false,
+      abortController: null
+    });
+  },
 
   // --- Session Actions ---
   
@@ -126,13 +140,18 @@ const useChatStore = create((set, get) => ({
 
   // --- Message Actions ---
 
-  fetchMessages: async (sessionId, params = {}) => {
+  fetchMessages: async (sessionId, params = { skip: 0, limit: 50 }) => {
     set({ isLoadingMessages: true });
     try {
       const data = await chatMessageService.getMessages(sessionId, params);
-      // Assuming pagination returns oldest last, reverse if needed based on API
-      // Usually chat interfaces want oldest first in the UI
-      set({ messages: data.data?.items?.reverse() || [] });
+      const fetchedMessages = data.data?.messages || [];
+      const pagination = data.data?.pagination || {};
+      
+      set({ 
+        messages: fetchedMessages.reverse(),
+        hasMoreMessages: pagination.has_more || false,
+        messagesSkip: params.skip,
+      });
     } catch (err) {
       console.error(err);
       toast.error('Failed to load messages');
@@ -141,26 +160,61 @@ const useChatStore = create((set, get) => ({
     }
   },
 
+  loadMoreMessages: async (sessionId) => {
+    const state = get();
+    if (state.isFetchingMore || !state.hasMoreMessages) return;
+
+    set({ isFetchingMore: true });
+    const nextSkip = state.messagesSkip + 50;
+    
+    try {
+      const data = await chatMessageService.getMessages(sessionId, { skip: nextSkip, limit: 50 });
+      const newMessages = data.data?.messages || [];
+      const pagination = data.data?.pagination || {};
+      
+      set({ 
+        messages: [...newMessages.reverse(), ...state.messages],
+        hasMoreMessages: pagination.has_more || false,
+        messagesSkip: nextSkip,
+      });
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to load older messages');
+    } finally {
+      set({ isFetchingMore: false });
+    }
+  },
+
   sendMessage: async (sessionId, content) => {
     if (!content.trim() || get().isStreaming) return;
 
+    const controller = new AbortController();
+
     // Optimistically add user message
     const userMessage = {
-      id: `temp-${Date.now()}`,
+      id: `temp-user-${Date.now()}`,
       role: 'user',
       content: content,
       created_at: new Date().toISOString()
     };
 
-    set((state) => ({
-      messages: [...state.messages, userMessage],
-      isStreaming: true,
-      streamingMessage: {
-        id: `stream-${Date.now()}`,
-        role: 'agent',
-        content: '',
-        status: 'processing'
+    const assistantId = `assistant-${Date.now()}`;
+    const assistantMessage = {
+      id: assistantId,
+      role: 'agent',
+      content: '',
+      status: 'streaming',
+      created_at: new Date().toISOString(),
+      metadata: {
+        phase: 'starting',
+        tools: []
       }
+    };
+
+    set((state) => ({
+      messages: [...state.messages, userMessage, assistantMessage],
+      isStreaming: true,
+      abortController: controller
     }));
 
     await chatMessageService.sendMessageStream(
@@ -171,60 +225,61 @@ const useChatStore = create((set, get) => ({
       (chunk) => {
         const { event, data } = chunk;
         
-        set((state) => {
-          if (!state.streamingMessage) return state;
-          
-          let updatedContent = state.streamingMessage.content;
-          let updatedStatus = state.streamingMessage.status;
-          
-          if (event === 'token' && data.token) {
-            updatedContent += data.token;
-          } else if (event === 'status') {
-             // Handle intermediate pipeline statuses (e.g. searching, indexing)
-             updatedStatus = data.status || updatedStatus;
-          } else if (event === 'error') {
-            updatedStatus = 'error';
-          }
-          
-          return {
-            streamingMessage: {
-              ...state.streamingMessage,
-              content: updatedContent,
-              status: updatedStatus
+        set((state) => ({
+          messages: state.messages.map(msg => {
+            if (msg.id !== assistantId) return msg;
+
+            let updatedContent = msg.content;
+            let updatedStatus = msg.status;
+            let updatedPhase = msg.metadata?.phase || 'processing';
+            
+            if (event === 'token' && data.content) {
+              updatedContent += data.content;
+            } else if (event === 'pipeline' && data.type) {
+               updatedPhase = data.type;
+            } else if (event === 'error') {
+               updatedStatus = 'error';
+            } else if (event === 'done') {
+               updatedStatus = data.status || 'completed';
             }
-          };
-        });
+            
+            return {
+              ...msg,
+              id: (event === 'done' && data.message_id) ? data.message_id : msg.id,
+              content: updatedContent,
+              status: updatedStatus,
+              created_at: (event === 'done' && data.created_at) ? data.created_at : msg.created_at,
+              metadata: {
+                ...msg.metadata,
+                phase: updatedPhase
+              }
+            };
+          })
+        }));
       },
       
       // onError handler
       (err) => {
-        set((state) => {
-          if (!state.streamingMessage) return state;
-          return {
-            streamingMessage: {
-              ...state.streamingMessage,
-              status: 'error',
-              content: state.streamingMessage.content + '\\n\\n*An error occurred while generating the response.*'
-            },
-            isStreaming: false
-          };
-        });
+        set((state) => ({
+          messages: state.messages.map(msg => 
+            msg.id === assistantId 
+              ? { ...msg, status: 'error', content: msg.content + '\n\n*An error occurred while generating the response.*' }
+              : msg
+          ),
+          isStreaming: false,
+          abortController: null
+        }));
         toast.error('Failed to send message');
       },
       
       // onComplete handler
       () => {
-        set((state) => {
-          if (!state.streamingMessage) return { isStreaming: false };
-          
-          // Move the completed streaming message to the permanent message list
-          return {
-            messages: [...state.messages, { ...state.streamingMessage, status: 'completed' }],
-            streamingMessage: null,
-            isStreaming: false
-          };
-        });
-      }
+        set((state) => ({
+          isStreaming: false,
+          abortController: null
+        }));
+      },
+      controller.signal
     );
   }
 }));

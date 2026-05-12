@@ -477,10 +477,10 @@ async def list_messages(
         ChatMessage.chat_id == session.id
     ).scalar() or 0
     
-    # Query paginated messages (oldest first)
+    # Query paginated messages (newest first)
     messages = db.query(ChatMessage).filter(
         ChatMessage.chat_id == session.id
-    ).order_by(ChatMessage.created_at.asc()).offset(skip).limit(limit).all()
+    ).order_by(ChatMessage.created_at.desc()).offset(skip).limit(limit).all()
     
     # Build response
     messages_data = [MessageResponse.model_validate(msg) for msg in messages]

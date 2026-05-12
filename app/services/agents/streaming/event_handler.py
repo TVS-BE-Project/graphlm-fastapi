@@ -71,7 +71,7 @@ def format_event_as_sse(event_type: str, event_data: Any) -> str:
     """
     if event_type == "text":
         # Message text chunk (raw)
-        return f"data: {event_data}\n\n"
+        return f"event: token\ndata: {json.dumps({'content': event_data})}\n\n"
 
     elif event_type == "graph_update":
         # Structured subgraph from subgraph_query tool — named SSE event
@@ -81,29 +81,36 @@ def format_event_as_sse(event_type: str, event_data: Any) -> str:
     elif event_type == "tool_call":
         # Tool invocation: {"tool_name": str, ...}
         tool_json = json.dumps(event_data)
-        return f"data: [TOOL] call {tool_json}\n\n"
+        return f"event: tool_start\ndata: {tool_json}\n\n"
 
     elif event_type == "tool_output":
         # Tool result: {"tool_name": str, "output": str}
         tool_json = json.dumps(event_data)
-        return f"data: [TOOL] output {tool_json}\n\n"
+        return f"event: tool_end\ndata: {tool_json}\n\n"
 
     elif event_type == "pipeline":
         # Context stage: {"type": str, "session_id": str, "payload": dict}
         pipeline_json = json.dumps(event_data)
-        return f"data: [PIPELINE] {pipeline_json}\n\n"
+        return f"event: pipeline\ndata: {pipeline_json}\n\n"
 
     return ""  # Unknown event type
 
 
 def format_error_event(message: str) -> str:
     """Format an error event as SSE."""
-    return f"data: [ERROR] {message}\n\n"
+    return f"event: error\ndata: {json.dumps({'message': message})}\n\n"
 
 
-def format_done_event() -> str:
+def format_done_event(message_id: str = None, created_at: str = None) -> str:
     """Format completion marker as SSE."""
-    return "data: [DONE]\n\n"
+    if message_id and created_at:
+        payload = json.dumps({
+            "message_id": message_id,
+            "created_at": created_at,
+            "status": "completed"
+        })
+        return f"event: done\ndata: {payload}\n\n"
+    return "event: done\ndata: {}\n\n"
 
 
 async def collect_agent_chunks(

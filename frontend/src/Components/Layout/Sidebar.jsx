@@ -510,6 +510,8 @@ function Sidebar() {
       <AvatarUploadModal
         open={avatarModalOpen}
         onClose={() => setAvatarModalOpen(false)}
+        avatarUrl={avatarUrl}
+        displayName={displayName}
       />
 
       {/* Rename / Delete Modals */}

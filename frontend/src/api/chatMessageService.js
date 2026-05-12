@@ -11,7 +11,7 @@ const chatMessageService = {
   },
 
   // Send a message and handle the SSE stream response
-  sendMessageStream: async (sessionId, messageData, onChunk, onError, onComplete) => {
+  sendMessageStream: async (sessionId, messageData, onChunk, onError, onComplete, signal) => {
     try {
       const response = await fetch(`${API_URL}sessions/${sessionId}/messages`, {
         method: "POST",
@@ -20,7 +20,8 @@ const chatMessageService = {
           "Accept": "text/event-stream"
         },
         body: JSON.stringify(messageData),
-        credentials: "include" // Important: sends cookies for auth
+        credentials: "include", // Important: sends cookies for auth
+        signal: signal
       });
 
       if (!response.ok) {
@@ -65,21 +66,29 @@ const chatMessageService = {
             if (part.startsWith('event:')) {
               eventType = part.slice(6).trim();
             } else if (part.startsWith('data:')) {
-              dataStr += part.slice(5).trim();
+              dataStr += part.slice(5) + '\n';
             }
           }
+
+          dataStr = dataStr.trim();
 
           if (dataStr) {
             try {
               const data = JSON.parse(dataStr);
               if (onChunk) onChunk({ event: eventType, data });
+              if (eventType === 'done' && onComplete) onComplete();
             } catch (err) {
-              console.error("Failed to parse SSE JSON:", dataStr, err);
+              console.error(`Failed to parse SSE JSON for event ${eventType}:`, dataStr, err);
             }
           }
         }
       }
     } catch (error) {
+      if (error.name === 'AbortError') {
+        console.log('Stream aborted by user');
+        if (onComplete) onComplete();
+        return;
+      }
       console.error("SSE Streaming Error:", error);
       if (onError) onError(error);
     }
