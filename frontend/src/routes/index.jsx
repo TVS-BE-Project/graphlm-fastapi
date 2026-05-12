@@ -76,12 +76,22 @@ const router = createBrowserRouter([
             element: <Dashboard />,
           },
           {
-            path: 'c/:id',
-            element: <Chat />,
-          },
-          {
             path: '*',
             element: <NotFoundPage />,
+          },
+        ],
+      },
+      {
+        path: 'chat/:id',
+        element: (
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        ),
+        children: [
+          {
+            path: '',
+            element: <Chat />,
           },
         ],
       },

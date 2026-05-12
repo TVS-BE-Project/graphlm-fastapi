@@ -145,7 +145,7 @@ function Sidebar() {
   const handleNewChat = async () => {
     try {
       const newSession = await createSession({ title: 'New Chat' })
-      navigate(`/dashboard/c/${newSession.id}`)
+      navigate(`/chat/${newSession.id}`)
     } catch (err) {
       // error handled in store
     }
@@ -265,7 +265,7 @@ function Sidebar() {
               {sessions.map(session => (
                 <div key={session.id} className="relative group">
                   <button
-                    onClick={() => navigate(`/dashboard/c/${session.id}`)}
+                    onClick={() => navigate(`/chat/${session.id}`)}
                     className={`flex items-center gap-3 w-full p-2.5 rounded-lg transition-colors text-sm truncate pr-8 ${
                       session.id === currentSessionId 
                         ? (isDark ? 'bg-[#212121] text-gray-100' : 'bg-gray-200 text-gray-900') 
@@ -337,7 +337,7 @@ function Sidebar() {
                    {sessions.slice(0, 10).map(session => (
                      <div key={session.id} className="relative group px-2">
                        <button
-                         onClick={() => navigate(`/dashboard/c/${session.id}`)}
+                         onClick={() => navigate(`/chat/${session.id}`)}
                          className={`flex items-center gap-3 w-full p-2.5 rounded-lg transition-colors text-sm truncate pr-8 ${
                            session.id === currentSessionId 
                              ? (isDark ? 'bg-[#3c4043] text-gray-100' : 'bg-gray-100 text-gray-900') 
@@ -390,7 +390,7 @@ function Sidebar() {
           {/* Dropdown Menu (Opens Upward) */}
           {userMenuOpen && (
             <div className={`absolute bottom-full mb-2 rounded-xl shadow-xl border py-1.5 z-50 ${
-              isCollapsed ? 'left-full ml-3 w-[240px]' : 'left-0 w-[240px]'
+              isCollapsed ? 'left-full ml-3 w-60' : 'left-0 w-60'
             } ${
               isDark ? 'bg-[#212121] border-gray-700 text-gray-200' : 'bg-white border-gray-200 text-gray-800'
             }`}>
@@ -440,7 +440,7 @@ function Sidebar() {
 
                 {/* Theme Submenu */}
                 {themeSubmenuOpen && (
-                  <div className={`absolute bottom-0 rounded-xl shadow-xl border py-1.5 z-50 w-[180px] ${
+                  <div className={`absolute bottom-0 rounded-xl shadow-xl border py-1.5 z-50 w-45 ${
                     isCollapsed ? 'left-full ml-1' : 'left-full ml-1'
                   } ${
                     isDark ? 'bg-[#212121] border-gray-700' : 'bg-white border-gray-200'
@@ -508,7 +508,7 @@ function Sidebar() {
       </div>
 
       <AvatarUploadModal
-        isOpen={avatarModalOpen}
+        open={avatarModalOpen}
         onClose={() => setAvatarModalOpen(false)}
       />
 

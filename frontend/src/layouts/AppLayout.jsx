@@ -6,10 +6,10 @@ import AppFooter from '@/Components/Layout/Footer'
 function AppLayout() {
   const location = useLocation()
   
-  // Match exactly /dashboard or /dashboard/
-  const isDashboard = location.pathname === '/dashboard' || location.pathname === '/dashboard/'
+  // Show dashboard layout only on exact /dashboard path (header only)
+  const isDashboardListView = location.pathname === '/dashboard' || location.pathname === '/dashboard/'
 
-  if (isDashboard) {
+  if (isDashboardListView) {
     return (
       <div className="h-screen flex flex-col bg-white dark:bg-[#212121] overflow-hidden text-gray-900 dark:text-white transition-colors duration-200">
         <AppHeader />
@@ -20,6 +20,7 @@ function AppLayout() {
     )
   }
 
+  // Show chat layout for /chat routes (sidebar replaces header)
   return (
     <div className="h-screen flex flex-row bg-white dark:bg-[#212121] text-gray-900 dark:text-white transition-colors duration-200 overflow-hidden">
       <Sidebar />

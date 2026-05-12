@@ -119,7 +119,7 @@ function AppHeader() {
 
           {/* Dropdown Menu (Opens Downward) */}
           {userMenuOpen && (
-            <div className="absolute top-full right-0 mt-2 w-[240px] rounded-xl shadow-xl border py-1.5 z-50 bg-white dark:bg-[#303134] border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200">
+            <div className="absolute top-full right-0 mt-2 w-60 rounded-xl shadow-xl border py-1.5 z-50 bg-white dark:bg-[#303134] border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200">
               
               {/* Email Display */}
               <div className="px-4 py-3 text-sm truncate border-b border-gray-100 dark:border-gray-700">
@@ -160,7 +160,7 @@ function AppHeader() {
 
                 {themeSubmenuOpen && (
                   <div 
-                    className="absolute top-0 right-full mr-1 w-[160px] rounded-xl shadow-xl border py-1.5 z-50 bg-white dark:bg-[#303134] border-gray-200 dark:border-gray-700"
+                    className="absolute top-0 right-full mr-1 w-40 rounded-xl shadow-xl border py-1.5 z-50 bg-white dark:bg-[#303134] border-gray-200 dark:border-gray-700"
                     onMouseLeave={() => setThemeSubmenuOpen(false)}
                   >
                     {themeOptions.map((option) => {

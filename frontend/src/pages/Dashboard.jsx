@@ -39,14 +39,14 @@ function Dashboard() {
   const handleCreateChat = async () => {
     try {
       const newSession = await createSession({ title: 'New Chat' })
-      navigate(`/dashboard/c/${newSession.id}`)
+      navigate(`/chat/${newSession.id}`)
     } catch (err) {
       console.error(err)
     }
   }
 
   const handleOpenChat = (id) => {
-    navigate(`/dashboard/c/${id}`)
+    navigate(`/chat/${id}`)
   }
 
   const handleSearchChange = useCallback((e) => {
