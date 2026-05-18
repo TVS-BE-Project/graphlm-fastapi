@@ -137,29 +137,50 @@ function Chat() {
     });
   }, [currentSession, sourceProgress]);
 
+  const sessionDate = currentSession?.created_at
+    ? new Date(currentSession.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
+    : 'Today'
+
   return (
     <div className="flex h-full min-h-0 flex-col bg-(--bg-base)">
       {/* Top Header */}
       <div className="border-b border-(--border-subtle) px-4 py-2 flex items-center justify-between bg-(--bg-surface) shrink-0">
-        <div className="flex items-center gap-4">
+        {/* Left: back + title */}
+        <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={() => navigate('/dashboard')}
-            className="group relative flex items-center justify-center p-1.5 rounded text-(--text-muted) hover:text-(--text-primary) hover:bg-(--bg-hover) transition-colors"
+            className="p-1.5 rounded text-(--text-muted) hover:text-(--text-primary) hover:bg-(--bg-hover) transition-colors shrink-0"
+            title="Back to Dashboard"
           >
             <ArrowLeft className="w-4 h-4" />
-            <div className="absolute top-full mt-2 px-2 py-1 bg-(--bg-elevated) text-(--text-primary) text-xs rounded border border-(--border-default) opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none" style={{ fontFamily: 'var(--font-mono)' }}>
-              Back to Dashboard
-            </div>
           </button>
 
-          <div className="flex flex-col">
-            <h1 className="text-sm font-medium text-(--text-primary) leading-tight" style={{ fontFamily: 'var(--font-mono)' }}>
+          <div className="flex flex-col min-w-0">
+            <h1 className="text-sm font-semibold text-(--text-primary) leading-tight truncate" style={{ fontFamily: 'var(--font-mono)' }}>
               {currentSession?.title || 'Loading session...'}
             </h1>
-            <span className="text-xs text-(--text-muted)" style={{ fontFamily: 'var(--font-mono)' }}>
-              {currentSession?.sources?.length || 0} sources · {currentSession?.created_at ? new Date(currentSession.created_at).toLocaleDateString() : 'Today'}
+            <span className="text-[11px] text-(--text-muted) font-mono">
+              {currentSession?.sources?.length || 0} source{currentSession?.sources?.length !== 1 ? 's' : ''} · {sessionDate}
             </span>
           </div>
+        </div>
+
+        {/* Right: panel toggles */}
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            onClick={() => setIsSourcesOpen(v => !v)}
+            title={isSourcesOpen ? 'Collapse Sources' : 'Open Sources'}
+            className={`p-1.5 rounded transition-colors ${isSourcesOpen ? 'text-(--text-primary) bg-(--bg-hover)' : 'text-(--text-muted) hover:text-(--text-primary) hover:bg-(--bg-hover)'}`}
+          >
+            <PanelLeftOpen className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setIsStudioOpen(v => !v)}
+            title={isStudioOpen ? 'Collapse Canvas' : 'Open Canvas'}
+            className={`p-1.5 rounded transition-colors ${isStudioOpen ? 'text-(--text-primary) bg-(--bg-hover)' : 'text-(--text-muted) hover:text-(--text-primary) hover:bg-(--bg-hover)'}`}
+          >
+            <PanelRightOpen className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
@@ -266,12 +287,12 @@ function Chat() {
               </div>
             </button>
             <div className="flex flex-col gap-2 w-full px-2">
-               <div className="group relative w-full aspect-square rounded bg-(--bg-elevated) flex items-center justify-center text-(--accent-cyan) cursor-pointer hover:bg-(--accent-cyan-dim) transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 3h5v5"/><path d="M21 3 9 15"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>
-                  <div className="absolute right-full mr-3 px-2 py-1 bg-(--bg-elevated) text-(--text-primary) text-xs rounded border border-(--border-default) opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none" style={{ fontFamily: 'var(--font-mono)' }}>
-                    Graph Tools
-                  </div>
-               </div>
+              <div className="group relative w-full aspect-square rounded bg-(--bg-elevated) flex items-center justify-center text-(--accent-cyan) cursor-pointer hover:bg-(--accent-cyan-dim) transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 3h5v5" /><path d="M21 3 9 15" /><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" /></svg>
+                <div className="absolute right-full mr-3 px-2 py-1 bg-(--bg-elevated) text-(--text-primary) text-xs rounded border border-(--border-default) opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none" style={{ fontFamily: 'var(--font-mono)' }}>
+                  Graph Tools
+                </div>
+              </div>
             </div>
           </div>
         )}

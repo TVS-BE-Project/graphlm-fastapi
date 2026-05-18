@@ -14,6 +14,7 @@ import { toast } from 'sonner'
 import useAuthStore from '@/store/authStore'
 import { useThemeStore } from '@/store'
 import AvatarUploadModal from '../Common/Modals/AvatarUploadModal'
+import GraphLMLogo from '../Common/GraphLMLogo'
 
 const getDisplayName = (user) => user?.firstName || user?.username || 'User'
 const DEFAULT_AVATAR_URL = 'https://placehold.co/600x400'
@@ -89,14 +90,9 @@ function AppHeader() {
       <div className="h-14 px-6 flex items-center justify-between gap-4">
         <button
           onClick={() => navigate('/dashboard')}
-          className="flex items-center gap-2"
+          className="flex items-center"
         >
-          <div className="w-7 h-7 rounded bg-(--accent-cyan-dim) flex items-center justify-center">
-            <Monitor className="w-4 h-4 text-(--accent-cyan)" />
-          </div>
-          <h1 className="text-base font-semibold tracking-wide text-(--text-primary)" style={{ fontFamily: 'var(--font-mono)' }}>
-            GraphLM
-          </h1>
+          <GraphLMLogo variant="full" height={26} />
         </button>
 
         <div className="flex items-center gap-4 relative">

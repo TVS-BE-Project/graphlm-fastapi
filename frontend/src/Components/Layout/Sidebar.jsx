@@ -24,6 +24,7 @@ import { toast } from 'sonner'
 import useAuthStore from '@/store/authStore'
 import { useThemeStore, useChatStore } from '@/store'
 import AvatarUploadModal from '../Common/Modals/AvatarUploadModal'
+import GraphLMLogo from '../Common/GraphLMLogo'
 
 const getDisplayName = (user) => user?.firstName || user?.username || 'User'
 const DEFAULT_AVATAR_URL = 'https://placehold.co/600x400'
@@ -202,15 +203,12 @@ function Sidebar() {
             onClick={() => setIsCollapsed(false)}
             className="w-9 h-9 flex items-center justify-center rounded hover:bg-(--bg-hover) text-(--text-muted) hover:text-(--text-primary) transition-colors mx-auto"
           >
-            {topLogoHovered ? <PanelLeftOpen className="w-4 h-4" /> : <Monitor className="w-4 h-4" />}
+            {topLogoHovered ? <PanelLeftOpen className="w-4 h-4" /> : <GraphLMLogo variant="icon" height={22} />}
           </button>
         ) : (
           <>
             <div className="flex items-center gap-2 ml-1">
-              <div className="w-6 h-6 rounded bg-(--accent-cyan-dim) flex items-center justify-center">
-                <Monitor className="w-3.5 h-3.5 text-(--accent-cyan)" />
-              </div>
-              <span className="text-sm font-semibold text-(--text-primary)" style={{ fontFamily: 'var(--font-mono)' }}>GraphLM</span>
+              <GraphLMLogo variant="full" height={22} />
             </div>
             <button
               onClick={() => setIsCollapsed(true)}
@@ -259,11 +257,10 @@ function Sidebar() {
                 <div key={session.id} className="relative group">
                   <button
                     onClick={() => navigate(`/chat/${session.id}`)}
-                    className={`flex items-center gap-2 w-full p-2 rounded transition-colors text-xs truncate pr-7 ${
-                      session.id === currentSessionId
+                    className={`flex items-center gap-2 w-full p-2 rounded transition-colors text-xs truncate pr-7 ${session.id === currentSessionId
                         ? 'bg-(--accent-cyan-dim) text-(--accent-cyan)'
                         : 'text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--text-primary)'
-                    }`}
+                      }`}
                   >
                     <MessageSquare className="w-3.5 h-3.5 shrink-0" />
                     <span className="truncate flex-1 text-left" style={{ fontFamily: 'var(--font-mono)' }}>{session.title || 'Untitled Chat'}</span>
@@ -307,72 +304,71 @@ function Sidebar() {
 
         {isCollapsed && (
           <div className="flex flex-col items-center gap-2 mt-2 relative">
-             <button
-               onClick={() => setRecentMenuOpen(!recentMenuOpen)}
-               className={`w-9 h-9 flex items-center justify-center rounded transition-colors ${recentMenuOpen ? 'bg-(--accent-cyan-dim) text-(--accent-cyan)' : 'hover:bg-(--bg-hover) text-(--text-muted) hover:text-(--text-primary)'}`}
-               title="Recent Chats"
-             >
-               <MessageSquare className="w-4 h-4" />
-             </button>
+            <button
+              onClick={() => setRecentMenuOpen(!recentMenuOpen)}
+              className={`w-9 h-9 flex items-center justify-center rounded transition-colors ${recentMenuOpen ? 'bg-(--accent-cyan-dim) text-(--accent-cyan)' : 'hover:bg-(--bg-hover) text-(--text-muted) hover:text-(--text-primary)'}`}
+              title="Recent Chats"
+            >
+              <MessageSquare className="w-4 h-4" />
+            </button>
 
-             {recentMenuOpen && (
-               <div
-                 ref={recentMenuRef}
-                 className="absolute left-full top-0 ml-3 w-60 rounded border border-(--border-strong) py-2 z-50 flex flex-col bg-(--bg-elevated) shadow-xl"
-               >
-                 <div className="px-4 py-2 text-[10px] font-medium uppercase tracking-widest text-(--text-muted)" style={{ fontFamily: 'var(--font-mono)' }}>
-                   Recents
-                 </div>
+            {recentMenuOpen && (
+              <div
+                ref={recentMenuRef}
+                className="absolute left-full top-0 ml-3 w-60 rounded border border-(--border-strong) py-2 z-50 flex flex-col bg-(--bg-elevated) shadow-xl"
+              >
+                <div className="px-4 py-2 text-[10px] font-medium uppercase tracking-widest text-(--text-muted)" style={{ fontFamily: 'var(--font-mono)' }}>
+                  Recents
+                </div>
 
-                 <div className="space-y-0.5 pb-2">
-                   {sessions.slice(0, 10).map(session => (
-                     <div key={session.id} className="relative group px-2">
-                       <button
-                         onClick={() => navigate(`/chat/${session.id}`)}
-                         className={`flex items-center gap-2 w-full p-2 rounded transition-colors text-xs truncate pr-8 ${
-                           session.id === currentSessionId
-                             ? 'bg-(--accent-cyan-dim) text-(--accent-cyan)'
-                             : 'text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--text-primary)'
-                         }`}
-                       >
-                         <span className="truncate flex-1 text-left" style={{ fontFamily: 'var(--font-mono)' }}>{session.title || 'Untitled Chat'}</span>
-                       </button>
+                <div className="space-y-0.5 pb-2">
+                  {sessions.slice(0, 10).map(session => (
+                    <div key={session.id} className="relative group px-2">
+                      <button
+                        onClick={() => navigate(`/chat/${session.id}`)}
+                        className={`flex items-center gap-2 w-full p-2 rounded transition-colors text-xs truncate pr-8 ${session.id === currentSessionId
+                            ? 'bg-(--accent-cyan-dim) text-(--accent-cyan)'
+                            : 'text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--text-primary)'
+                          }`}
+                      >
+                        <span className="truncate flex-1 text-left" style={{ fontFamily: 'var(--font-mono)' }}>{session.title || 'Untitled Chat'}</span>
+                      </button>
 
-                       {/* 3-dot menu button */}
-                       <button
-                         onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === session.id ? null : session.id); }}
-                         className={`absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded transition-opacity ${openMenuId === session.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} text-(--text-muted) hover:bg-(--bg-hover) hover:text-(--text-primary)`}
-                       >
-                         <MoreHorizontal className="w-3.5 h-3.5" />
-                       </button>
+                      {/* 3-dot menu button */}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === session.id ? null : session.id); }}
+                        className={`absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded transition-opacity ${openMenuId === session.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} text-(--text-muted) hover:bg-(--bg-hover) hover:text-(--text-primary)`}
+                      >
+                        <MoreHorizontal className="w-3.5 h-3.5" />
+                      </button>
 
-                       {/* Dropdown Menu inside Recents Popover */}
-                       {openMenuId === session.id && (
-                         <div
-                           ref={sessionMenuRef}
-                           className="absolute right-8 top-full -mt-2 w-32 rounded border border-(--border-strong) bg-(--bg-elevated) shadow-xl py-1 z-60 overflow-hidden"
-                         >
-                           <button
-                             onClick={(e) => openRenameModal(e, session)}
-                             className="w-full text-left px-3 py-2 text-xs text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--text-primary) flex items-center gap-2 transition-colors"
-                             style={{ fontFamily: 'var(--font-mono)' }}
-                           >
-                             <Edit2 className="w-3.5 h-3.5" /> Rename
-                           </button>
-                           <button
-                             onClick={(e) => openDeleteModal(e, session)}
-                             className="w-full text-left px-3 py-2 text-xs text-(--accent-red) hover:bg-(--accent-red-dim) flex items-center gap-2 transition-colors"
-                             style={{ fontFamily: 'var(--font-mono)' }}
-                           >
-                             <Trash2 className="w-3.5 h-3.5" /> Delete
-                           </button>
-                         </div>
-                       )}
-                     </div>
-                   ))}
-                 </div>
-               </div>
-             )}
+                      {/* Dropdown Menu inside Recents Popover */}
+                      {openMenuId === session.id && (
+                        <div
+                          ref={sessionMenuRef}
+                          className="absolute right-8 top-full -mt-2 w-32 rounded border border-(--border-strong) bg-(--bg-elevated) shadow-xl py-1 z-60 overflow-hidden"
+                        >
+                          <button
+                            onClick={(e) => openRenameModal(e, session)}
+                            className="w-full text-left px-3 py-2 text-xs text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--text-primary) flex items-center gap-2 transition-colors"
+                            style={{ fontFamily: 'var(--font-mono)' }}
+                          >
+                            <Edit2 className="w-3.5 h-3.5" /> Rename
+                          </button>
+                          <button
+                            onClick={(e) => openDeleteModal(e, session)}
+                            className="w-full text-left px-3 py-2 text-xs text-(--accent-red) hover:bg-(--accent-red-dim) flex items-center gap-2 transition-colors"
+                            style={{ fontFamily: 'var(--font-mono)' }}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" /> Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -382,9 +378,8 @@ function Sidebar() {
         <div className="relative w-full">
           {/* Dropdown Menu (Opens Upward) */}
           {userMenuOpen && (
-            <div className={`absolute bottom-full mb-2 rounded border border-(--border-strong) py-1 z-50 bg-(--bg-elevated) shadow-xl ${
-              isCollapsed ? 'left-full ml-3 w-56' : 'left-0 w-56'
-            }`}>
+            <div className={`absolute bottom-full mb-2 rounded border border-(--border-strong) py-1 z-50 bg-(--bg-elevated) shadow-xl ${isCollapsed ? 'left-full ml-3 w-56' : 'left-0 w-56'
+              }`}>
 
               {/* Email Display */}
               <div className="px-4 py-3 text-xs truncate border-b border-(--border-subtle) text-(--text-muted)" style={{ fontFamily: 'var(--font-mono)' }}>
@@ -425,9 +420,8 @@ function Sidebar() {
 
                 {/* Theme Submenu */}
                 {themeSubmenuOpen && (
-                  <div className={`absolute bottom-0 rounded border border-(--border-strong) py-1 z-50 w-36 bg-(--bg-elevated) shadow-xl ${
-                    isCollapsed ? 'left-full ml-1' : 'left-full ml-1'
-                  }`}>
+                  <div className={`absolute bottom-0 rounded border border-(--border-strong) py-1 z-50 w-36 bg-(--bg-elevated) shadow-xl ${isCollapsed ? 'left-full ml-1' : 'left-full ml-1'
+                    }`}>
                     {themeOptions.map((option) => {
                       const Icon = option.icon
                       const isSelected = selectedThemeValue === option.value

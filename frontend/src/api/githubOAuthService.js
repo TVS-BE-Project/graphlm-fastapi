@@ -23,4 +23,3 @@ const githubOAuthService = {
 };
 
 export default githubOAuthService;
-

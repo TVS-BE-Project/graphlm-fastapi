@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40" fill="none">
+  <!-- Node circles -->
+  <circle cx="14" cy="20" r="5" fill="#00C896"/>
+  <circle cx="32" cy="9"  r="4" fill="#00C896" opacity="0.75"/>
+  <circle cx="32" cy="31" r="4" fill="#00C896" opacity="0.75"/>
+
+  <!-- Edges -->
+  <line x1="18.5" y1="17.5" x2="28.5" y2="11.5" stroke="#00C896" stroke-width="1.5" opacity="0.6"/>
+  <line x1="18.5" y1="22.5" x2="28.5" y2="28.5" stroke="#00C896" stroke-width="1.5" opacity="0.6"/>
+
+  <!-- Wordmark -->
+  <text x="44" y="25"
+    font-family="'JetBrains Mono', 'Fira Code', 'Courier New', monospace"
+    font-size="16"
+    font-weight="600"
+    letter-spacing="-0.3"
+    fill="#F0F4F8">Graph</text>
+  <text x="101" y="25"
+    font-family="'JetBrains Mono', 'Fira Code', 'Courier New', monospace"
+    font-size="16"
+    font-weight="600"
+    letter-spacing="-0.3"
+    fill="#00C896">LM</text>
+</svg>
