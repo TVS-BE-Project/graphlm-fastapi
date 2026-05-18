@@ -12,7 +12,7 @@ function AuthPage() {
   const [searchParams] = useSearchParams()
   const { login, register, isLoading, error, clearError } = useAuthStore()
   const theme = useThemeStore((state) => state.theme)
-  const gitHubLogo = theme === 'dark' ? GitHubMarkDark : GitHubMarkWhite
+  const gitHubLogo = GitHubMarkDark
   const [authMode, setAuthMode] = useState('login')
 
   // Login form state
@@ -111,227 +111,218 @@ function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
-          {authMode === 'login' ? 'Login' : 'Create Account'}
-        </h2>
+    <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center p-4">
+      <div className="bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded-md w-full max-w-md overflow-hidden shadow-xl">
+        {/* Header */}
+        <div className="px-8 pt-8 pb-6 border-b border-[var(--border-subtle)]">
+          <h2 className="text-xl font-semibold text-[var(--text-primary)] text-center" style={{ fontFamily: 'var(--font-mono)' }}>
+            {authMode === 'login' ? 'Login' : 'Create Account'}
+          </h2>
+        </div>
 
-        {authMode === 'login' ? (
-          // Login Form
-          <form onSubmit={handleLoginSubmit} className="space-y-4">
-            {/* OAuth Error Message */}
-            {searchParams.get('error') && (
-              <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 rounded-lg text-sm border border-yellow-200 dark:border-yellow-800">
-                <p className="font-medium mb-1">GitHub Authentication Failed</p>
-                <p>{getErrorMessage(searchParams.get('error'))}</p>
+        <div className="px-8 py-6">
+          {authMode === 'login' ? (
+            // Login Form
+            <form onSubmit={handleLoginSubmit} className="space-y-4">
+              {/* OAuth Error Message */}
+              {searchParams.get('error') && (
+                <div className="p-3 bg-[var(--accent-amber-dim)] text-[var(--accent-amber)] rounded border border-[var(--accent-amber)]/30 text-sm">
+                  <p className="font-medium mb-1">GitHub Authentication Failed</p>
+                  <p>{getErrorMessage(searchParams.get('error'))}</p>
+                </div>
+              )}
+
+              <div>
+                <label className="field-label">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={loginForm.email}
+                  onChange={handleLoginChange}
+                  required
+                  className="field-input"
+                  placeholder="you@example.com"
+                />
               </div>
-            )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={loginForm.email}
-                onChange={handleLoginChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="you@example.com"
-              />
-            </div>
+              <div>
+                <label className="field-label">Password</label>
+                <input
+                  type="password"
+                  name="password"
+                  value={loginForm.password}
+                  onChange={handleLoginChange}
+                  required
+                  className="field-input"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => navigate('/forgot-password')}
+                  className="mt-2 text-xs text-[var(--accent-cyan)] hover:underline"
+                  style={{ fontFamily: 'var(--font-mono)' }}
+                >
+                  Forgot Password?
+                </button>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={loginForm.password}
-                onChange={handleLoginChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="••••••••"
-              />
+              {error && (
+                <div className="p-3 bg-[var(--accent-red-dim)] text-[var(--accent-red)] border border-[var(--accent-red)]/30 rounded text-sm">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="btn-primary w-full"
+              >
+                {isLoading ? 'Logging in...' : 'Login'}
+              </button>
+
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-[var(--border-subtle)]"></div>
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="px-3 bg-[var(--bg-elevated)] text-[var(--text-muted)]" style={{ fontFamily: 'var(--font-mono)' }}>or</span>
+                </div>
+              </div>
+
               <button
                 type="button"
-                onClick={() => navigate('/forgot-password')}
-                className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                onClick={handleGitHubLogin}
+                className="btn-ghost w-full flex items-center justify-center gap-2"
               >
-                Forgot Password?
+                <img src={gitHubLogo} alt="GitHub" className="w-4 h-4 invert" />
+                <span>Continue with GitHub</span>
               </button>
-            </div>
-
-            {error && (
-              <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-lg text-sm">
-                {error}
+            </form>
+          ) : (
+            // Signup Form
+            <form onSubmit={handleSignupSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="field-label">First Name</label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={signupForm.firstName}
+                    onChange={handleSignupChange}
+                    required
+                    className="field-input"
+                  />
+                </div>
+                <div>
+                  <label className="field-label">Last Name</label>
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={signupForm.lastName}
+                    onChange={handleSignupChange}
+                    required
+                    className="field-input"
+                  />
+                </div>
               </div>
-            )}
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-            >
-              {isLoading ? 'Logging in...' : 'Login'}
-            </button>
-
-            <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">or</span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleGitHubLogin}
-              className="w-full flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-            >
-              <img src={gitHubLogo} alt="GitHub" className="w-5 h-5" />
-              <span>Continue with GitHub</span>
-            </button>
-          </form>
-        ) : (
-          // Signup Form
-          <form onSubmit={handleSignupSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  First Name
-                </label>
+                <label className="field-label">Username</label>
                 <input
                   type="text"
-                  name="firstName"
-                  value={signupForm.firstName}
+                  name="username"
+                  value={signupForm.username}
                   onChange={handleSignupChange}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="field-input"
+                  placeholder="3-13 chars, alphanumeric + _ or -"
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Last Name
-                </label>
+                <label className="field-label">Email</label>
                 <input
-                  type="text"
-                  name="lastName"
-                  value={signupForm.lastName}
+                  type="email"
+                  name="email"
+                  value={signupForm.email}
                   onChange={handleSignupChange}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="field-input"
+                  placeholder="you@example.com"
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Username
-              </label>
-              <input
-                type="text"
-                name="username"
-                value={signupForm.username}
-                onChange={handleSignupChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="3-13 chars, alphanumeric + _ or -"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={signupForm.email}
-                onChange={handleSignupChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="you@example.com"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={signupForm.password}
-                onChange={handleSignupChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="••••••••"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={signupForm.confirmPassword}
-                onChange={handleSignupChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="••••••••"
-              />
-            </div>
-
-            {error && (
-              <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-lg text-sm">
-                {error}
+              <div>
+                <label className="field-label">Password</label>
+                <input
+                  type="password"
+                  name="password"
+                  value={signupForm.password}
+                  onChange={handleSignupChange}
+                  required
+                  className="field-input"
+                  placeholder="••••••••"
+                />
               </div>
-            )}
 
+              <div>
+                <label className="field-label">Confirm Password</label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={signupForm.confirmPassword}
+                  onChange={handleSignupChange}
+                  required
+                  className="field-input"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              {error && (
+                <div className="p-3 bg-[var(--accent-red-dim)] text-[var(--accent-red)] border border-[var(--accent-red)]/30 rounded text-sm">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="btn-primary w-full"
+              >
+                {isLoading ? 'Creating account...' : 'Sign Up'}
+              </button>
+
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-[var(--border-subtle)]"></div>
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="px-3 bg-[var(--bg-elevated)] text-[var(--text-muted)]" style={{ fontFamily: 'var(--font-mono)' }}>or</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => githubOAuthService.redirectToGitHub()}
+                className="btn-ghost w-full flex items-center justify-center gap-2"
+              >
+                <img src={gitHubLogo} alt="GitHub" className="w-4 h-4 invert" />
+                <span>Sign up with GitHub</span>
+              </button>
+            </form>
+          )}
+
+          <p className="text-center text-[var(--text-secondary)] text-sm mt-6">
+            {authMode === 'login' ? "Don't have an account? " : 'Already have an account? '}
             <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+              onClick={toggleAuthMode}
+              className="text-[var(--accent-cyan)] hover:underline font-medium"
+              style={{ fontFamily: 'var(--font-mono)' }}
             >
-              {isLoading ? 'Creating account...' : 'Sign Up'}
+              {authMode === 'login' ? 'Sign up' : 'Login'}
             </button>
-
-            <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">or</span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => githubOAuthService.redirectToGitHub()}
-              className="w-full flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-            >
-              <img src={gitHubLogo} alt="GitHub" className="w-5 h-5" />
-              <span>Sign up with GitHub</span>
-            </button>
-          </form>
-        )}
-
-        <p className="text-center text-gray-600 dark:text-gray-400 mt-6">
-          {authMode === 'login' ? "Don't have an account? " : 'Already have an account? '}
-          <button
-            onClick={toggleAuthMode}
-            className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
-          >
-            {authMode === 'login' ? 'Sign up' : 'Login'}
-          </button>
-        </p>
+          </p>
+        </div>
       </div>
     </div>
   )

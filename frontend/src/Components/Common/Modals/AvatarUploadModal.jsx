@@ -6,13 +6,13 @@ import useAuthStore from '@/store/authStore'
 
 export default function AvatarUploadModal({ open, onClose, avatarUrl, displayName }) {
   const { user, setUser } = useAuthStore()
-  
+
   const [selectedFile, setSelectedFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState(null)
-  
+
   const [fullname, setFullname] = useState(user?.fullname || user?.firstName || '')
   const [username, setUsername] = useState(user?.username || '')
-  
+
   const [saving, setSaving] = useState(false)
   const fileInputRef = useRef(null)
 
@@ -60,12 +60,12 @@ export default function AvatarUploadModal({ open, onClose, avatarUrl, displayNam
       // Handle Profile Details Update
       const isNameChanged = fullname !== (user.fullname || user.firstName || '')
       const isUsernameChanged = username !== (user.username || '')
-      
+
       if (isNameChanged || isUsernameChanged) {
         const updatePayload = {}
         if (isNameChanged) updatePayload.fullname = fullname
         if (isUsernameChanged) updatePayload.username = username
-        
+
         const profileRes = await userService.updateProfile(updatePayload)
         const updatedProfile = profileRes?.data ?? profileRes
         updatedUser = { ...updatedUser, ...updatedProfile }
@@ -85,29 +85,29 @@ export default function AvatarUploadModal({ open, onClose, avatarUrl, displayNam
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50 px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white dark:bg-[#212121] p-6 shadow-xl">
-        <div className="flex items-start justify-between">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Edit profile</h3>
+    <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/70 px-4">
+      <div className="w-full max-w-md rounded border border-[var(--border-strong)] bg-[var(--bg-elevated)] p-6 shadow-2xl">
+        <div className="flex items-start justify-between mb-6">
+          <h3 className="text-sm font-semibold text-[var(--text-primary)] uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)' }}>Edit profile</h3>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+            className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors text-sm"
             aria-label="Close"
           >
             ✕
           </button>
         </div>
 
-        <div className="mt-6 flex flex-col items-center gap-6">
+        <div className="flex flex-col items-center gap-5">
           <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-            <div className="h-24 w-24 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700 relative">
+            <div className="h-20 w-20 overflow-hidden rounded-full border-2 border-[var(--border-default)] relative">
               {previewUrl ? (
                 <img src={previewUrl} alt="preview" className="h-full w-full object-cover" />
               ) : (
                 <img src={avatarUrl} alt={displayName} className="h-full w-full object-cover" />
               )}
-              <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-colors">
-                <Camera className="w-6 h-6 text-white" />
+              <div className="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center transition-colors rounded-full">
+                <Camera className="w-5 h-5 text-[var(--accent-cyan)]" />
               </div>
             </div>
             <input
@@ -121,28 +121,24 @@ export default function AvatarUploadModal({ open, onClose, avatarUrl, displayNam
 
           <div className="w-full space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Display name
-              </label>
+              <label className="field-label">Display name</label>
               <input
                 type="text"
                 value={fullname}
                 onChange={(e) => setFullname(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#171717] px-3 py-2 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="field-input"
               />
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Username
-              </label>
+              <label className="field-label">Username</label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#171717] px-3 py-2 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="field-input"
               />
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              <p className="mt-1.5 text-xs text-[var(--text-muted)]" style={{ fontFamily: 'var(--font-mono)' }}>
                 Your profile helps people recognize you in group chats.
               </p>
             </div>
@@ -152,7 +148,7 @@ export default function AvatarUploadModal({ open, onClose, avatarUrl, displayNam
             <button
               type="button"
               onClick={onClose}
-              className="rounded-full px-5 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="btn-ghost"
             >
               Cancel
             </button>
@@ -161,7 +157,7 @@ export default function AvatarUploadModal({ open, onClose, avatarUrl, displayNam
               type="button"
               onClick={handleSave}
               disabled={saving}
-              className="rounded-full bg-blue-600 dark:bg-white dark:text-black px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-500 disabled:opacity-60 dark:hover:bg-gray-200"
+              className="btn-primary"
             >
               {saving ? 'Saving...' : 'Save'}
             </button>

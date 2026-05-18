@@ -35,27 +35,27 @@ function CanvasPanel({ onCollapse, currentSession, selectedSources = [], onActiv
   }
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-gray-200 border-l border-gray-200 dark:border-gray-800">
+    <div className="flex flex-col h-full bg-[var(--bg-surface)] text-[var(--text-primary)] border-l border-[var(--border-subtle)]">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-800 shrink-0">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-subtle)] shrink-0">
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-1 text-sm font-medium min-w-0">
+        <nav className="flex items-center gap-1 text-xs font-medium min-w-0" style={{ fontFamily: 'var(--font-mono)' }}>
           <button
             onClick={handleBack}
-            className={`flex items-center gap-1.5 transition-colors ${
+            className={`flex items-center gap-1.5 transition-colors uppercase tracking-widest ${
               activeTool
-                ? 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-100'
-                : 'text-gray-800 dark:text-gray-100 cursor-default'
+                ? 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                : 'text-[var(--text-muted)] cursor-default'
             }`}
           >
-            <LayoutTemplate className="w-4 h-4 shrink-0" />
+            <LayoutTemplate className="w-3.5 h-3.5 shrink-0" />
             <span>Canvas</span>
           </button>
 
           {activeTool && (
             <>
-              <ChevronRight className="w-3.5 h-3.5 text-gray-400 dark:text-gray-600 shrink-0" />
-              <span className="text-gray-800 dark:text-gray-100 truncate">
+              <ChevronRight className="w-3 h-3 text-[var(--text-muted)] shrink-0" />
+              <span className="text-[var(--text-secondary)] truncate uppercase tracking-widest">
                 {TOOL_LABELS[activeTool]}
               </span>
             </>
@@ -64,7 +64,7 @@ function CanvasPanel({ onCollapse, currentSession, selectedSources = [], onActiv
 
         <button
           onClick={handleCollapse}
-          className="shrink-0 ml-2 text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-200 p-1 rounded-md hover:bg-gray-100 dark:hover:bg-[#2a2a2a] transition-colors"
+          className="shrink-0 ml-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 rounded hover:bg-[var(--bg-hover)] transition-colors"
           title="Close Canvas"
         >
           <PanelRightClose className="w-4 h-4" />

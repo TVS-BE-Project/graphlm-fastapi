@@ -81,27 +81,27 @@ function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 w-full max-w-md">
-        <div className="text-center">
+    <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center p-4">
+      <div className="bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded-md w-full max-w-md overflow-hidden shadow-xl">
+        <div className="p-8 text-center">
           {(status === 'idle' || status === 'loading') && (
             <>
-              <Lock className="w-16 h-16 text-blue-500 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              <Lock className="w-12 h-12 text-[var(--accent-cyan)] mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
                 Set New Password
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
+              <p className="text-[var(--text-secondary)] mb-6 text-sm">
                 Enter your new password below.
               </p>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4 text-left">
                 <div>
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="New password"
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="field-input"
                     disabled={status === 'loading'}
                   />
                 </div>
@@ -112,19 +112,19 @@ function ResetPasswordPage() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Confirm password"
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="field-input"
                     disabled={status === 'loading'}
                   />
                 </div>
 
                 {error && (
-                  <div className="text-sm text-red-600 dark:text-red-400">{error}</div>
+                  <div className="text-sm text-[var(--accent-red)] bg-[var(--accent-red-dim)] border border-[var(--accent-red)]/30 rounded px-3 py-2">{error}</div>
                 )}
 
                 <button
                   type="submit"
                   disabled={status === 'loading' || !token}
-                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                  className="btn-primary w-full"
                 >
                   {status === 'loading' ? 'Resetting...' : 'Reset Password'}
                 </button>
@@ -132,7 +132,8 @@ function ResetPasswordPage() {
 
               <button
                 onClick={() => navigate('/auth?mode=login')}
-                className="w-full text-blue-600 dark:text-blue-400 hover:underline font-semibold py-2 px-4 mt-4"
+                className="w-full text-[var(--accent-cyan)] hover:underline text-sm font-medium py-2 px-4 mt-4"
+                style={{ fontFamily: 'var(--font-mono)' }}
               >
                 Back to Login
               </button>
@@ -141,17 +142,17 @@ function ResetPasswordPage() {
 
           {status === 'success' && (
             <>
-              <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              <CheckCircle className="w-12 h-12 text-[var(--accent-cyan)] mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
                 Password Reset!
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
+              <p className="text-[var(--text-secondary)] mb-6 text-sm">
                 Your password has been reset successfully. You can now login with your new password.
               </p>
 
               <button
                 onClick={() => navigate('/auth?mode=login')}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                className="btn-primary w-full"
               >
                 Go to Login
               </button>
@@ -160,11 +161,11 @@ function ResetPasswordPage() {
 
           {status === 'error' && (
             <>
-              <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              <AlertCircle className="w-12 h-12 text-[var(--accent-red)] mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
                 Reset Failed
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
+              <p className="text-[var(--text-secondary)] mb-6 text-sm">{error}</p>
 
               {!showResend && (
                 <button
@@ -174,7 +175,7 @@ function ResetPasswordPage() {
                     setPassword('')
                     setConfirmPassword('')
                   }}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors mb-3"
+                  className="btn-primary w-full mb-3"
                 >
                   Try Again
                 </button>
@@ -182,17 +183,17 @@ function ResetPasswordPage() {
 
               {showResend && (
                 <>
-                  <form onSubmit={handleResendEmail} className="space-y-3 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <form onSubmit={handleResendEmail} className="space-y-3 mt-4 pt-4 border-t border-[var(--border-subtle)] text-left">
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Enter your email"
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="field-input"
                     />
                     <button
                       type="submit"
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                      className="btn-primary w-full"
                     >
                       Resend Reset Email
                     </button>
@@ -202,7 +203,8 @@ function ResetPasswordPage() {
 
               <button
                 onClick={() => navigate('/auth?mode=login')}
-                className="w-full text-blue-600 dark:text-blue-400 hover:underline font-semibold py-2 px-4 mt-3"
+                className="w-full text-[var(--accent-cyan)] hover:underline text-sm font-medium py-2 px-4 mt-3"
+                style={{ fontFamily: 'var(--font-mono)' }}
               >
                 Back to Login
               </button>

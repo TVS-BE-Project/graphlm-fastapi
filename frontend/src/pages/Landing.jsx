@@ -4,27 +4,31 @@ function Landing() {
   const navigate = useNavigate()
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+    <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center">
       <div className="text-center px-4">
-        <div className="mb-8">
-          <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-4">
+        <div className="mb-10">
+          <div className="inline-flex items-center gap-2 mb-6 px-3 py-1 rounded-full border border-[var(--border-default)] text-[var(--text-muted)] text-xs font-mono tracking-widest uppercase">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-cyan)] inline-block" />
+            Knowledge Graph Intelligence
+          </div>
+          <h1 className="text-6xl font-bold text-[var(--text-primary)] mb-4" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '-0.02em' }}>
             GraphLM
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400">
+          <p className="text-lg text-[var(--text-secondary)]" style={{ fontFamily: 'var(--font-sans)' }}>
             Chat with your knowledge graphs
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="flex flex-col items-center gap-3">
           <button
             onClick={() => navigate('/auth?mode=login')}
-            className="w-64 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            className="btn-primary w-56"
           >
             Login
           </button>
           <button
             onClick={() => navigate('/auth?mode=signup')}
-            className="w-64 bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 text-blue-600 dark:text-blue-400 font-semibold py-3 px-6 rounded-lg border border-blue-200 dark:border-blue-600 transition-colors"
+            className="btn-ghost w-56"
           >
             Sign Up
           </button>

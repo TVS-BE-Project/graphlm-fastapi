@@ -15,20 +15,15 @@ import AddSourceModal from '@/Components/Chat/AddSourceModal'
 function Chat() {
   const { id } = useParams()
   const navigate = useNavigate()
-  
+
   const FileIcon = ({ filename, className }) => {
     const ext = filename?.split('.').pop()?.toLowerCase();
     if (ext === 'pdf') return <img src="/fileIcons/file-pdf.svg" alt="PDF" className={className} />;
     if (ext === 'doc' || ext === 'docx') return <img src="/fileIcons/file-docx.svg" alt="Word" className={className} />;
     if (ext === 'md' || ext === 'markdown') return <img src="/fileIcons/file-code.svg" alt="Markdown" className={className} />;
-    return (
-      <>
-        <img src="/fileIcons/file-text-dark.svg" alt="Text" className={`${className} hidden dark:block`} />
-        <img src="/fileIcons/file-text-light.svg" alt="Text" className={`${className} block dark:hidden`} />
-      </>
-    );
+    return <img src="/fileIcons/file-text-dark.svg" alt="Text" className={className} />;
   };
-  
+
   const { sessions, fetchSessions, fetchMessages } = useChatStore()
 
   // Make sure sessions are loaded
@@ -47,7 +42,7 @@ function Chat() {
   const currentSession = useMemo(() => {
     return sessions.find(s => s.id === id)
   }, [sessions, id])
-  
+
   const [sourceProgress, setSourceProgress] = useState({})
 
   // ── Selected-sources for Canvas scoping ──────────────────────────────
@@ -69,7 +64,7 @@ function Chat() {
   const handleOpenSource = (source) => {
     const meta = source.metadata || source.source_metadata || {};
     const url = meta.repo_url || meta.file_url || meta.cloudinary_url || meta.local_path;
-    
+
     if (url) {
       // Create an anchor tag to bypass async popup blockers
       const a = document.createElement('a');
@@ -98,9 +93,9 @@ function Chat() {
         onSnapshot: (data) => {
           setSourceProgress(prev => ({
             ...prev,
-            [source.id]: { 
+            [source.id]: {
               vector_indexed: data.vector?.indexed || false,
-              graph_indexed: data.graph?.indexed || false 
+              graph_indexed: data.graph?.indexed || false
             }
           }));
         },
@@ -111,7 +106,7 @@ function Chat() {
             const nextGraphIndexed = data.graph_indexed !== undefined ? data.graph_indexed : (prevProgress.graph_indexed || false);
             return {
               ...prev,
-              [source.id]: { 
+              [source.id]: {
                 vector_indexed: nextVectorIndexed,
                 graph_indexed: nextGraphIndexed
               }
@@ -143,26 +138,26 @@ function Chat() {
   }, [currentSession, sourceProgress]);
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-white dark:bg-[#1e1e1e]">
-      {/* Top Header - Global App Header or Session Return */}
-      <div className="border-b border-gray-200 dark:border-gray-800 px-4 py-2 flex items-center justify-between bg-white dark:bg-[#1e1e1e]">
+    <div className="flex h-full min-h-0 flex-col bg-[var(--bg-base)]">
+      {/* Top Header */}
+      <div className="border-b border-[var(--border-subtle)] px-4 py-2 flex items-center justify-between bg-[var(--bg-surface)] shrink-0">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/dashboard')}
-            className="group relative flex items-center justify-center p-1.5 rounded-lg text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#2a2a2a] transition-colors"
+            className="group relative flex items-center justify-center p-1.5 rounded text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
           >
-            <ArrowLeft className="w-5 h-5" />
-            <div className="absolute top-full mt-2 px-2 py-1 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-medium rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-md pointer-events-none">
+            <ArrowLeft className="w-4 h-4" />
+            <div className="absolute top-full mt-2 px-2 py-1 bg-[var(--bg-elevated)] text-[var(--text-primary)] text-xs rounded border border-[var(--border-default)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none" style={{ fontFamily: 'var(--font-mono)' }}>
               Back to Dashboard
             </div>
           </button>
-          
+
           <div className="flex flex-col">
-            <h1 className="text-base font-medium text-gray-900 dark:text-white leading-tight">
+            <h1 className="text-sm font-medium text-[var(--text-primary)] leading-tight" style={{ fontFamily: 'var(--font-mono)' }}>
               {currentSession?.title || 'Loading session...'}
             </h1>
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              {currentSession?.sources?.length || 0} sources • {currentSession?.created_at ? new Date(currentSession.created_at).toLocaleDateString() : 'Today'}
+            <span className="text-xs text-[var(--text-muted)]" style={{ fontFamily: 'var(--font-mono)' }}>
+              {currentSession?.sources?.length || 0} sources · {currentSession?.created_at ? new Date(currentSession.created_at).toLocaleDateString() : 'Today'}
             </span>
           </div>
         </div>
@@ -171,38 +166,38 @@ function Chat() {
       <div className="flex-1 min-h-0 overflow-hidden flex">
         {/* Collapsed Sources Toolbar */}
         {!isSourcesOpen && (
-          <div className="w-16 shrink-0 h-full bg-white dark:bg-[#1e1e1e] border-r border-gray-200 dark:border-gray-800 flex flex-col items-center py-3 gap-4">
+          <div className="w-14 shrink-0 h-full bg-[var(--bg-surface)] border-r border-[var(--border-subtle)] flex flex-col items-center py-3 gap-3">
             <button
               onClick={() => setIsSourcesOpen(true)}
-              className="group relative p-2 rounded-lg text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#2a2a2a] transition-colors"
+              className="group relative p-2 rounded text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
             >
-              <PanelLeftOpen className="w-5 h-5" />
-              <div className="absolute left-full ml-3 px-2 py-1 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-medium rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-md pointer-events-none">
+              <PanelLeftOpen className="w-4 h-4" />
+              <div className="absolute left-full ml-3 px-2 py-1 bg-[var(--bg-elevated)] text-[var(--text-primary)] text-xs rounded border border-[var(--border-default)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none" style={{ fontFamily: 'var(--font-mono)' }}>
                 Open Sources
               </div>
             </button>
             <div className="flex flex-col gap-2 w-full px-2">
-              <button 
+              <button
                 onClick={() => setIsAddModalOpen(true)}
-                className="group relative p-2 rounded-lg bg-gray-100 dark:bg-[#2a2a2a] text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white flex items-center justify-center transition-colors"
+                className="group relative p-2 rounded bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--accent-cyan)] hover:bg-[var(--accent-cyan-dim)] flex items-center justify-center transition-colors"
               >
-                <span className="text-lg leading-none">+</span>
-                <div className="absolute left-full ml-3 px-2 py-1 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-medium rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-md pointer-events-none">
+                <span className="text-base leading-none">+</span>
+                <div className="absolute left-full ml-3 px-2 py-1 bg-[var(--bg-elevated)] text-[var(--text-primary)] text-xs rounded border border-[var(--border-default)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none" style={{ fontFamily: 'var(--font-mono)' }}>
                   Add Source
                 </div>
               </button>
               {currentSession?.sources?.map(s => (
-                <div 
-                  key={s.id} 
+                <div
+                  key={s.id}
                   onClick={() => handleOpenSource(s)}
-                  className="group relative w-full aspect-square rounded-lg bg-gray-100 dark:bg-[#2a2a2a] flex items-center justify-center cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  className="group relative w-full aspect-square rounded bg-[var(--bg-elevated)] flex items-center justify-center cursor-pointer hover:bg-[var(--bg-hover)] transition-colors"
                 >
                   {s.type === 'github' ? (
-                    <GitBranch className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                    <GitBranch className="w-4 h-4 text-[var(--text-muted)]" />
                   ) : (
-                    <FileIcon filename={s.title} className="w-5 h-5" />
+                    <FileIcon filename={s.title} className="w-4 h-4" />
                   )}
-                  <div className="absolute left-full ml-3 px-2 py-1 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-medium rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-md pointer-events-none">
+                  <div className="absolute left-full ml-3 px-2 py-1 bg-[var(--bg-elevated)] text-[var(--text-primary)] text-xs rounded border border-[var(--border-default)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none" style={{ fontFamily: 'var(--font-mono)' }}>
                     {s.title}
                   </div>
                 </div>
@@ -217,9 +212,9 @@ function Chat() {
             {isSourcesOpen && (
               <>
                 <Panel defaultSize="20" minSize="15" maxSize="40">
-                  <SourcesPanel 
-                    currentSession={currentSession} 
-                    sourceProgress={sourceProgress} 
+                  <SourcesPanel
+                    currentSession={currentSession}
+                    sourceProgress={sourceProgress}
                     onCollapse={() => setIsSourcesOpen(false)}
                     onOpenAddModal={() => setIsAddModalOpen(true)}
                     handleOpenSource={handleOpenSource}
@@ -228,13 +223,13 @@ function Chat() {
                     isGraphViewOpen={activeCanvasTool === 'graph'}
                   />
                 </Panel>
-                <PanelResizeHandle className="w-1 bg-transparent hover:bg-blue-500/50 active:bg-blue-500 transition-colors cursor-col-resize z-10" />
+                <PanelResizeHandle className="w-px bg-[var(--border-subtle)] hover:bg-[var(--accent-cyan)] active:bg-[var(--accent-cyan)] transition-colors cursor-col-resize z-10" />
               </>
             )}
 
             {/* Panel 2: Chat */}
             <Panel defaultSize="50" minSize="30">
-              <ChatPanel 
+              <ChatPanel
                 currentSession={currentSession}
                 isVectorIndexing={isVectorIndexing}
                 selectedSources={selectedSources}
@@ -244,9 +239,9 @@ function Chat() {
             {/* Panel 3: Studio */}
             {isStudioOpen && (
               <>
-                <PanelResizeHandle className="w-1 bg-transparent hover:bg-blue-500/50 active:bg-blue-500 transition-colors cursor-col-resize z-10" />
+                <PanelResizeHandle className="w-px bg-[var(--border-subtle)] hover:bg-[var(--accent-cyan)] active:bg-[var(--accent-cyan)] transition-colors cursor-col-resize z-10" />
                 <Panel defaultSize="30" minSize="20" maxSize="50">
-                  <StudioPanel 
+                  <StudioPanel
                     onCollapse={() => setIsStudioOpen(false)}
                     currentSession={currentSession}
                     selectedSources={selectedSources}
@@ -260,37 +255,30 @@ function Chat() {
 
         {/* Collapsed Studio Toolbar */}
         {!isStudioOpen && (
-          <div className="w-16 shrink-0 h-full bg-white dark:bg-[#1e1e1e] border-l border-gray-200 dark:border-gray-800 flex flex-col items-center py-3 gap-4">
+          <div className="w-14 shrink-0 h-full bg-[var(--bg-surface)] border-l border-[var(--border-subtle)] flex flex-col items-center py-3 gap-3">
             <button
               onClick={() => setIsStudioOpen(true)}
-              className="group relative p-2 rounded-lg text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#2a2a2a] transition-colors"
+              className="group relative p-2 rounded text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
             >
-              <PanelRightOpen className="w-5 h-5" />
-              <div className="absolute right-full mr-3 px-2 py-1 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-medium rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-md pointer-events-none">
+              <PanelRightOpen className="w-4 h-4" />
+              <div className="absolute right-full mr-3 px-2 py-1 bg-[var(--bg-elevated)] text-[var(--text-primary)] text-xs rounded border border-[var(--border-default)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none" style={{ fontFamily: 'var(--font-mono)' }}>
                 Open Studio
               </div>
             </button>
-            <div className="flex flex-col gap-3 w-full px-2">
-               {/* Studio placeholder tools */}
-               <div className="group relative w-full aspect-square rounded-lg bg-gray-100 dark:bg-[#2a2a2a] flex items-center justify-center text-blue-500 dark:text-blue-400 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 3h5v5"/><path d="M21 3 9 15"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>
-                  <div className="absolute right-full mr-3 px-2 py-1 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-medium rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-md pointer-events-none">
+            <div className="flex flex-col gap-2 w-full px-2">
+               <div className="group relative w-full aspect-square rounded bg-[var(--bg-elevated)] flex items-center justify-center text-[var(--accent-cyan)] cursor-pointer hover:bg-[var(--accent-cyan-dim)] transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 3h5v5"/><path d="M21 3 9 15"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>
+                  <div className="absolute right-full mr-3 px-2 py-1 bg-[var(--bg-elevated)] text-[var(--text-primary)] text-xs rounded border border-[var(--border-default)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none" style={{ fontFamily: 'var(--font-mono)' }}>
                     Graph Tools
-                  </div>
-               </div>
-               <div className="group relative w-full aspect-square rounded-lg bg-gray-100 dark:bg-[#2a2a2a] flex items-center justify-center text-green-500 dark:text-green-400 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                  <div className="absolute right-full mr-3 px-2 py-1 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-medium rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-md pointer-events-none">
-                    Network View
                   </div>
                </div>
             </div>
           </div>
         )}
       </div>
-      
-      <AddSourceModal 
-        isOpen={isAddModalOpen} 
+
+      <AddSourceModal
+        isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         currentSession={currentSession}
       />
@@ -299,4 +287,3 @@ function Chat() {
 }
 
 export default Chat
-

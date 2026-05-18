@@ -58,7 +58,7 @@ function Dashboard() {
   const filteredSessions = useMemo(() => {
     if (!searchQuery.trim()) return sessions
     const lowerQuery = searchQuery.toLowerCase()
-    return sessions.filter(session => 
+    return sessions.filter(session =>
       session.title?.toLowerCase().includes(lowerQuery)
     )
   }, [sessions, searchQuery])
@@ -109,33 +109,35 @@ function Dashboard() {
   }
 
   return (
-    <div className="px-8 py-10 max-w-7xl mx-auto h-full font-sans transition-colors duration-200 flex flex-col relative">
-      
+    <div className="px-8 py-10 max-w-7xl mx-auto h-full flex flex-col relative">
+
       {/* Top Filter Bar */}
       <div className="flex items-center justify-between mb-12 h-10">
         {isSearchOpen ? (
           <div className="flex-1 flex items-center gap-3">
-             <div className="flex-1 flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-[#303134] rounded-full border border-gray-300 dark:border-gray-600 focus-within:ring-1 focus-within:ring-blue-500 transition-all shadow-sm dark:shadow-none">
-                <Search className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />
+             <div className="flex-1 flex items-center gap-2 px-4 py-2 bg-[var(--bg-elevated)] rounded border border-[var(--border-default)] focus-within:border-[var(--accent-cyan)] focus-within:shadow-[0_0_0_2px_var(--accent-cyan-dim)] transition-all">
+                <Search className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
                 <input
                   type="text"
                   autoFocus
                   placeholder="Search by chat title"
                   value={searchQuery}
                   onChange={handleSearchChange}
-                  className="bg-transparent border-none outline-none flex-1 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500"
+                  className="bg-transparent border-none outline-none flex-1 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+                  style={{ fontFamily: 'var(--font-mono)' }}
                 />
              </div>
-             <button 
-               onClick={() => { setIsSearchOpen(false); setSearchQuery(''); }} 
-               className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors px-2"
+             <button
+               onClick={() => { setIsSearchOpen(false); setSearchQuery(''); }}
+               className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors px-2"
+               style={{ fontFamily: 'var(--font-mono)' }}
              >
                Cancel
              </button>
           </div>
         ) : isSelectionMode ? (
           <div className="flex items-center gap-4 text-sm animate-in fade-in zoom-in-95 duration-200">
-            <button 
+            <button
               onClick={() => {
                 if (selectedChats.length === filteredSessions.length && filteredSessions.length > 0) {
                   setSelectedChats([])
@@ -143,39 +145,40 @@ function Dashboard() {
                   setSelectedChats(filteredSessions.map(s => s.id))
                 }
               }}
-              className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors flex items-center gap-2"
+              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-2"
             >
-              <input 
+              <input
                 type="checkbox"
                 checked={filteredSessions.length > 0 && selectedChats.length === filteredSessions.length}
                 readOnly
-                className="rounded border-gray-300 dark:border-gray-700 text-blue-600 focus:ring-blue-500 cursor-pointer w-4 h-4"
+                className="rounded border-[var(--border-default)] bg-[var(--bg-elevated)] text-[var(--accent-cyan)] cursor-pointer w-4 h-4 accent-[var(--accent-cyan)]"
               />
               Select All
             </button>
             {selectedChats.length > 0 && (
-              <button 
+              <button
                 onClick={() => setModalConfig({ type: 'deleteBulk' })}
-                className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors flex items-center gap-2"
+                className="text-[var(--accent-red)] hover:opacity-80 transition-opacity flex items-center gap-2"
               >
                 <Trash2 className="w-4 h-4" /> Delete ({selectedChats.length})
               </button>
             )}
-            <button 
+            <button
               onClick={() => {
                 setIsSelectionMode(false)
                 setSelectedChats([])
               }}
-              className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
             >
               Cancel
             </button>
           </div>
         ) : (
           <div className="flex items-center gap-4 text-sm">
-            <button 
+            <button
               onClick={() => setIsSelectionMode(true)}
-              className="px-4 py-1.5 rounded-full bg-blue-100 text-blue-800 dark:bg-[#3c4043] dark:text-white hover:bg-blue-200 dark:hover:bg-gray-600 transition-colors font-medium"
+              className="px-4 py-1.5 rounded border border-[var(--border-default)] text-[var(--text-secondary)] hover:border-[var(--border-strong)] hover:text-[var(--text-primary)] transition-colors"
+              style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.06em', textTransform: 'uppercase' }}
             >
               Select Chats
             </button>
@@ -184,29 +187,29 @@ function Dashboard() {
 
         <div className={`flex items-center gap-3 transition-all ${isSearchOpen ? 'ml-6' : ''}`}>
           {!isSearchOpen && (
-            <button onClick={() => setIsSearchOpen(true)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
-              <Search className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+            <button onClick={() => setIsSearchOpen(true)} className="p-2 rounded hover:bg-[var(--bg-hover)] transition-colors">
+              <Search className="w-4 h-4 text-[var(--text-secondary)]" />
             </button>
           )}
-          
-          <div className="flex bg-gray-100 dark:bg-[#3c4043] rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
-            <button 
+
+          <div className="flex bg-[var(--bg-elevated)] rounded overflow-hidden border border-[var(--border-default)]">
+            <button
               onClick={() => setViewMode('grid')}
-              className={`p-1.5 transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm text-gray-800 dark:bg-white/20 dark:text-white' : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'}`}
+              className={`p-1.5 transition-colors ${viewMode === 'grid' ? 'bg-[var(--bg-hover)] text-[var(--text-primary)]' : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'}`}
               title="Grid view"
             >
               <Grid className="w-4 h-4" />
             </button>
-            <button 
+            <button
               onClick={() => setViewMode('list')}
-              className={`p-1.5 transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-gray-800 dark:bg-white/20 dark:text-white' : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'}`}
+              className={`p-1.5 transition-colors ${viewMode === 'list' ? 'bg-[var(--bg-hover)] text-[var(--text-primary)]' : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'}`}
               title="List view"
             >
               <List className="w-4 h-4" />
             </button>
           </div>
 
-          <button onClick={handleCreateChat} className="flex items-center gap-2 bg-blue-600 text-white dark:bg-white dark:text-black px-4 py-1.5 rounded-full text-sm font-medium hover:bg-blue-700 dark:hover:bg-gray-200 transition-colors shrink-0">
+          <button onClick={handleCreateChat} className="btn-primary flex items-center gap-2 px-4 py-1.5 h-auto text-xs shrink-0">
             <Plus className="w-4 h-4" />
             Create new
           </button>
@@ -215,30 +218,30 @@ function Dashboard() {
 
       {/* Recent Chats Section */}
       <div className="flex-1 overflow-auto pb-10">
-        <h2 className="text-xl text-gray-900 dark:text-gray-200 mb-6">Recent chats</h2>
+        <h2 className="text-sm font-medium text-[var(--text-muted)] mb-6 uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)' }}>Recent chats</h2>
 
-        <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4" : "flex flex-col gap-3"}>
-          
+        <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4" : "flex flex-col gap-2"}>
+
           {/* Create New Card */}
-          <div 
+          <div
             onClick={handleCreateChat}
-            className={`group flex cursor-pointer transition-all ${
-              viewMode === 'grid' 
-                ? 'flex-col items-center justify-center h-48 bg-gray-50 border-gray-200 dark:bg-[#303134] rounded-2xl border dark:border-transparent hover:border-blue-400 dark:hover:border-gray-500'
-                : 'items-center p-4 bg-gray-50 border-gray-200 dark:bg-[#303134] rounded-xl border dark:border-transparent hover:border-blue-400 dark:hover:border-gray-500 gap-4'
+            className={`group flex cursor-pointer transition-all border border-dashed border-[var(--border-default)] hover:border-[var(--accent-cyan)] hover:bg-[var(--accent-cyan-dim)] rounded ${
+              viewMode === 'grid'
+                ? 'flex-col items-center justify-center h-44'
+                : 'items-center p-4 gap-4'
             }`}
           >
-            <div className={`rounded-full bg-blue-100 dark:bg-[#3c4043] group-hover:bg-blue-200 dark:group-hover:bg-[#4a4d51] flex items-center justify-center transition-colors ${viewMode === 'grid' ? 'w-12 h-12 mb-4' : 'w-10 h-10'}`}>
-              <Plus className={`text-blue-600 dark:text-[#a8c7fa] ${viewMode === 'grid' ? 'w-6 h-6' : 'w-5 h-5'}`} />
+            <div className={`rounded bg-[var(--bg-elevated)] group-hover:bg-[var(--accent-cyan-dim)] flex items-center justify-center transition-colors ${viewMode === 'grid' ? 'w-10 h-10 mb-3' : 'w-8 h-8'}`}>
+              <Plus className={`text-[var(--text-muted)] group-hover:text-[var(--accent-cyan)] transition-colors ${viewMode === 'grid' ? 'w-5 h-5' : 'w-4 h-4'}`} />
             </div>
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Create new chat</span>
+            <span className="text-xs font-medium text-[var(--text-muted)] group-hover:text-[var(--accent-cyan)] transition-colors" style={{ fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Create new chat</span>
           </div>
 
           {/* Actual Chats */}
           {isLoadingSessions ? (
-            <div className="col-span-full py-12 text-center text-gray-500">Loading chats...</div>
+            <div className="col-span-full py-12 text-center text-[var(--text-muted)] text-sm" style={{ fontFamily: 'var(--font-mono)' }}>Loading chats...</div>
           ) : filteredSessions.length === 0 ? (
-            <div className="col-span-full py-12 text-center text-gray-500">
+            <div className="col-span-full py-12 text-center text-[var(--text-muted)] text-sm" style={{ fontFamily: 'var(--font-mono)' }}>
               No chats found {searchQuery && 'matching your search'}
             </div>
           ) : (
@@ -252,47 +255,52 @@ function Dashboard() {
                     handleOpenChat(chat.id)
                   }
                 }}
-                className={`group relative flex cursor-pointer transition-all ${
+                className={`group relative flex cursor-pointer transition-all border rounded ${
                   viewMode === 'grid'
-                    ? 'flex-col h-48 bg-white border border-gray-200 hover:border-gray-400 dark:bg-[#303134] rounded-2xl dark:border-transparent dark:hover:border-gray-500 p-5 shadow-sm dark:shadow-none'
-                    : 'items-center gap-4 p-4 bg-white border border-gray-200 hover:border-gray-400 dark:bg-[#303134] rounded-xl dark:border-transparent dark:hover:border-gray-500 shadow-sm dark:shadow-none'
-                } ${isSelectionMode && selectedChats.includes(chat.id) ? 'border-blue-500 dark:border-blue-500 bg-blue-50/50 dark:bg-blue-900/20 ring-1 ring-blue-500' : ''}`}
+                    ? 'flex-col h-44 p-4'
+                    : 'items-center gap-4 p-3'
+                } ${isSelectionMode && selectedChats.includes(chat.id)
+                    ? 'border-[var(--accent-cyan)] bg-[var(--accent-cyan-dim)]'
+                    : 'border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--border-default)] hover:bg-[var(--bg-elevated)]'
+                }`}
               >
                 {/* 3-dot Menu Button or Checkbox */}
-                <div className={`absolute ${viewMode === 'grid' ? 'top-3 right-3' : 'top-1/2 -translate-y-1/2 right-4'} z-10`}>
+                <div className={`absolute ${viewMode === 'grid' ? 'top-3 right-3' : 'top-1/2 -translate-y-1/2 right-3'} z-10`}>
                   {isSelectionMode ? (
                     <input
                       type="checkbox"
                       checked={selectedChats.includes(chat.id)}
                       readOnly
-                      className="w-5 h-5 rounded border-gray-300 dark:border-gray-700 text-blue-600 focus:ring-blue-500 pointer-events-none"
+                      className="w-4 h-4 rounded border-[var(--border-default)] pointer-events-none accent-[var(--accent-cyan)]"
                     />
                   ) : (
                     <>
                       <button
                         onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === chat.id ? null : chat.id); }}
-                        className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                        className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors opacity-0 group-hover:opacity-100"
                       >
-                        <MoreHorizontal className="w-5 h-5" />
+                        <MoreHorizontal className="w-4 h-4" />
                       </button>
 
                       {/* Dropdown Menu */}
                       {openMenuId === chat.id && (
-                        <div 
+                        <div
                           ref={menuRef}
-                          className="absolute right-0 top-full mt-1 w-40 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#3c4043] shadow-lg py-1 z-50 overflow-hidden"
+                          className="absolute right-0 top-full mt-1 w-40 rounded border border-[var(--border-strong)] bg-[var(--bg-elevated)] shadow-xl py-1 z-50 overflow-hidden"
                         >
-                          <button 
+                          <button
                             onClick={(e) => openRenameModal(e, chat)}
-                            className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 flex items-center gap-2"
+                            className="w-full text-left px-3 py-2 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] flex items-center gap-2 transition-colors"
+                            style={{ fontFamily: 'var(--font-mono)' }}
                           >
-                            <Edit2 className="w-4 h-4" /> Rename
+                            <Edit2 className="w-3.5 h-3.5" /> Rename
                           </button>
-                          <button 
+                          <button
                             onClick={(e) => openDeleteModal(e, chat)}
-                            className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-white/10 flex items-center gap-2"
+                            className="w-full text-left px-3 py-2 text-xs text-[var(--accent-red)] hover:bg-[var(--accent-red-dim)] flex items-center gap-2 transition-colors"
+                            style={{ fontFamily: 'var(--font-mono)' }}
                           >
-                            <Trash2 className="w-4 h-4" /> Delete
+                            <Trash2 className="w-3.5 h-3.5" /> Delete
                           </button>
                         </div>
                       )}
@@ -302,27 +310,27 @@ function Dashboard() {
 
                 {/* Icon Placeholder */}
                 <div className={viewMode === 'grid' ? 'mb-auto' : ''}>
-                   <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                     <Grid className="w-4 h-4" />
+                   <div className="w-7 h-7 rounded bg-[var(--accent-cyan-dim)] flex items-center justify-center text-[var(--accent-cyan)]">
+                     <Grid className="w-3.5 h-3.5" />
                    </div>
                 </div>
 
                 <div className={viewMode === 'list' ? 'flex-1 flex items-center justify-between pr-10' : ''}>
                   <div className={viewMode === 'list' ? 'flex-1' : ''}>
-                    <h3 className={`font-medium text-gray-900 dark:text-white line-clamp-2 ${viewMode === 'grid' ? 'text-base mb-2 pr-6' : 'text-sm'}`}>
+                    <h3 className={`font-medium text-[var(--text-primary)] line-clamp-2 ${viewMode === 'grid' ? 'text-sm mb-2 pr-6' : 'text-sm'}`}>
                       {chat.title}
                     </h3>
                     {viewMode === 'grid' && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                      <p className="text-xs text-[var(--text-muted)] flex items-center gap-2" style={{ fontFamily: 'var(--font-mono)' }}>
                         {new Date(chat.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric'})}
-                        <span>•</span>
+                        <span>·</span>
                         {chat.sources?.length || 0} sources
                       </p>
                     )}
                   </div>
-                  
+
                   {viewMode === 'list' && (
-                    <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-4 shrink-0">
+                    <div className="text-xs text-[var(--text-muted)] flex items-center gap-4 shrink-0" style={{ fontFamily: 'var(--font-mono)' }}>
                       <span>{chat.sources?.length || 0} sources</span>
                       <span>{new Date(chat.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric'})}</span>
                     </div>
@@ -336,58 +344,52 @@ function Dashboard() {
 
       {/* Rename / Delete Modals */}
       {modalConfig.type && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white dark:bg-[#303134] border border-gray-200 dark:border-gray-700 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="modal-backdrop">
+          <div className="modal-box">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)]">
+              <h3 className="text-sm font-semibold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                 {modalConfig.type === 'rename' ? 'Rename Chat' : modalConfig.type === 'deleteBulk' ? 'Delete Selected Chats' : 'Delete Chat'}
               </h3>
-              <button onClick={closeModals} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                <X className="w-5 h-5" />
+              <button onClick={closeModals} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
+                <X className="w-4 h-4" />
               </button>
             </div>
-            
-            <div className="px-6 py-6">
+
+            <div className="px-6 py-5">
               {modalConfig.type === 'rename' ? (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Chat Title
-                  </label>
+                  <label className="field-label">Chat Title</label>
                   <input
                     type="text"
                     value={renameInput}
                     onChange={(e) => setRenameInput(e.target.value)}
                     autoFocus
                     onKeyDown={(e) => e.key === 'Enter' && confirmRename()}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-[#212121] text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="field-input"
                     placeholder="Enter chat title..."
                   />
                 </div>
               ) : modalConfig.type === 'deleteBulk' ? (
-                <p className="text-gray-600 dark:text-gray-300">
-                  Are you sure you want to delete <span className="font-semibold text-gray-900 dark:text-white">{selectedChats.length} selected chats</span>? This action cannot be undone.
+                <p className="text-[var(--text-secondary)] text-sm">
+                  Are you sure you want to delete <span className="font-semibold text-[var(--text-primary)]">{selectedChats.length} selected chats</span>? This action cannot be undone.
                 </p>
               ) : (
-                <p className="text-gray-600 dark:text-gray-300">
-                  Are you sure you want to delete <span className="font-semibold text-gray-900 dark:text-white">"{modalConfig.session?.title}"</span>? This action cannot be undone.
+                <p className="text-[var(--text-secondary)] text-sm">
+                  Are you sure you want to delete <span className="font-semibold text-[var(--text-primary)]">"{modalConfig.session?.title}"</span>? This action cannot be undone.
                 </p>
               )}
             </div>
 
-            <div className="px-6 py-4 bg-gray-50 dark:bg-[#212121] border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3">
+            <div className="px-6 py-4 bg-[var(--bg-surface)] border-t border-[var(--border-subtle)] flex justify-end gap-3">
               <button
                 onClick={closeModals}
-                className="px-4 py-2 rounded-lg font-medium text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#3c4043] transition-colors"
+                className="btn-ghost"
               >
                 Cancel
               </button>
               <button
                 onClick={modalConfig.type === 'rename' ? confirmRename : modalConfig.type === 'deleteBulk' ? confirmBulkDelete : confirmDelete}
-                className={`px-4 py-2 rounded-lg font-medium text-sm text-white transition-colors ${
-                  modalConfig.type === 'rename'
-                    ? 'bg-blue-600 hover:bg-blue-700'
-                    : 'bg-red-600 hover:bg-red-700'
-                }`}
+                className={modalConfig.type === 'rename' ? 'btn-primary' : 'btn-danger'}
               >
                 {modalConfig.type === 'rename' ? 'Save' : 'Delete'}
               </button>

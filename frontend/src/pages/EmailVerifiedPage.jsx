@@ -54,16 +54,16 @@ function EmailVerifiedPage() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 w-full max-w-md">
-        <div className="text-center">
+    <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center p-4">
+      <div className="bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded-md w-full max-w-md overflow-hidden shadow-xl">
+        <div className="p-8 text-center">
           {verificationStatus === 'pending' && (
             <>
-              <Mail className="w-16 h-16 text-blue-500 mx-auto mb-4 animate-bounce" />
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              <Mail className="w-12 h-12 text-[var(--accent-cyan)] mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
                 Verifying Your Email
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
+              <p className="text-[var(--text-secondary)] mb-4 text-sm">
                 Please wait while we verify your email address...
               </p>
             </>
@@ -71,16 +71,16 @@ function EmailVerifiedPage() {
 
           {verificationStatus === 'success' && (
             <>
-              <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              <CheckCircle className="w-12 h-12 text-[var(--accent-cyan)] mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
                 Email Verified!
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
+              <p className="text-[var(--text-secondary)] mb-6 text-sm">
                 Your email has been verified successfully. You can now login to your account.
               </p>
               <button
                 onClick={() => navigate('/auth?mode=login')}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                className="btn-primary w-full"
               >
                 Go to Login
               </button>
@@ -89,33 +89,33 @@ function EmailVerifiedPage() {
 
           {verificationStatus === 'error' && (
             <>
-              <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              <AlertCircle className="w-12 h-12 text-[var(--accent-red)] mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
                 Verification Failed
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
+              <p className="text-[var(--text-secondary)] mb-6 text-sm">
                 The verification link is invalid or has expired. Please request a new verification email.
               </p>
 
               <button
                 onClick={() => setShowResend(!showResend)}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors mb-3"
+                className="btn-primary w-full mb-3"
               >
                 Resend Verification Email
               </button>
 
               {showResend && (
-                <form onSubmit={handleResendEmail} className="space-y-3 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <form onSubmit={handleResendEmail} className="space-y-3 mt-4 pt-4 border-t border-[var(--border-subtle)]">
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="field-input"
                   />
                   <button
                     type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                    className="btn-primary w-full"
                   >
                     Resend
                   </button>
@@ -124,7 +124,8 @@ function EmailVerifiedPage() {
 
               <button
                 onClick={() => navigate('/auth?mode=login')}
-                className="w-full text-blue-600 dark:text-blue-400 hover:underline font-semibold py-2 px-4 mt-3"
+                className="w-full text-[var(--accent-cyan)] hover:underline text-sm font-medium py-2 px-4 mt-3"
+                style={{ fontFamily: 'var(--font-mono)' }}
               >
                 Back to Login
               </button>

@@ -32,19 +32,19 @@ function Sidebar() {
   const navigate = useNavigate()
   const location = useLocation()
   const { id: currentSessionId } = useParams()
-  
+
   const { user, logout } = useAuthStore()
   const { theme, resolvedTheme, setTheme } = useThemeStore()
   const { sessions, fetchSessions, createSession, deleteSession, renameSession } = useChatStore()
 
   // Default to collapsed when viewing a specific chat session
   const [isCollapsed, setIsCollapsed] = useState(true)
-  
+
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [themeSubmenuOpen, setThemeSubmenuOpen] = useState(false)
   const [topLogoHovered, setTopLogoHovered] = useState(false)
   const [recentMenuOpen, setRecentMenuOpen] = useState(false)
-  
+
   // States for session 3-dot menus
   const [openMenuId, setOpenMenuId] = useState(null)
   const [modalConfig, setModalConfig] = useState({ type: null, session: null })
@@ -56,7 +56,7 @@ function Sidebar() {
 
   const avatarUrl = user?.avatar?.url || DEFAULT_AVATAR_URL
   const displayName = useMemo(() => getDisplayName(user), [user])
-  
+
   const themeOptions = [
     { value: 'light', label: 'Light', icon: Sun },
     { value: 'dark', label: 'Dark', icon: Moon },
@@ -186,41 +186,37 @@ function Sidebar() {
   }
 
   const isDark = resolvedTheme === 'dark'
-  const sidebarWidth = isCollapsed ? 'w-[64px]' : 'w-[260px]'
+  const sidebarWidth = isCollapsed ? 'w-[56px]' : 'w-[240px]'
 
   return (
     <aside
-      className={`h-screen flex flex-col shrink-0 border-r transition-all duration-300 ease-in-out ${sidebarWidth} ${
-        isDark ? 'bg-[#171717] border-gray-800' : 'bg-gray-50 border-gray-200'
-      }`}
+      className={`h-screen flex flex-col shrink-0 border-r border-[var(--border-subtle)] bg-[var(--bg-surface)] transition-all duration-300 ease-in-out ${sidebarWidth}`}
       ref={menuRootRef}
     >
       {/* Top Header / Collapse Toggle */}
       <div className="p-3 flex items-center justify-between">
-        {/* If Collapsed, hovering shows PanelLeftOpen, else Monitor icon */}
         {isCollapsed ? (
           <button
             onMouseEnter={() => setTopLogoHovered(true)}
             onMouseLeave={() => setTopLogoHovered(false)}
             onClick={() => setIsCollapsed(false)}
-            className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors mx-auto ${
-              isDark ? 'hover:bg-[#212121] text-gray-200' : 'hover:bg-gray-200 text-gray-700'
-            }`}
+            className="w-9 h-9 flex items-center justify-center rounded hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors mx-auto"
           >
-            {topLogoHovered ? <PanelLeftOpen className="w-5 h-5" /> : <Monitor className="w-5 h-5" />}
+            {topLogoHovered ? <PanelLeftOpen className="w-4 h-4" /> : <Monitor className="w-4 h-4" />}
           </button>
         ) : (
           <>
-            <div className={`flex items-center justify-center rounded-full w-8 h-8 ml-1 ${isDark ? 'text-white' : 'text-gray-800'}`}>
-              <Monitor className="w-6 h-6" />
+            <div className="flex items-center gap-2 ml-1">
+              <div className="w-6 h-6 rounded bg-[var(--accent-cyan-dim)] flex items-center justify-center">
+                <Monitor className="w-3.5 h-3.5 text-[var(--accent-cyan)]" />
+              </div>
+              <span className="text-sm font-semibold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-mono)' }}>GraphLM</span>
             </div>
             <button
               onClick={() => setIsCollapsed(true)}
-              className={`p-2 rounded-lg transition-colors ${
-                isDark ? 'hover:bg-[#212121] text-gray-400' : 'hover:bg-gray-200 text-gray-500'
-              }`}
+              className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
             >
-              <PanelLeftClose className="w-5 h-5" />
+              <PanelLeftClose className="w-4 h-4" />
             </button>
           </>
         )}
@@ -231,21 +227,18 @@ function Sidebar() {
         <div className="px-3 pb-2 flex justify-center">
           <button
             onClick={handleNewChat}
-            className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors ${
-              isDark ? 'hover:bg-[#212121] text-gray-300' : 'hover:bg-gray-200 text-gray-700'
-            }`}
+            className="w-9 h-9 flex items-center justify-center rounded hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--accent-cyan)] transition-colors"
             title="New Chat"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-4 h-4" />
           </button>
         </div>
       ) : (
         <div className="px-3 pb-2">
           <button
             onClick={handleNewChat}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-medium text-sm ${
-              isDark ? 'bg-[#212121] hover:bg-[#2f2f2f] text-gray-200' : 'bg-white border border-gray-200 hover:bg-gray-100 text-gray-800 shadow-sm'
-            }`}
+            className="w-full flex items-center gap-2 px-3 py-2 rounded border border-[var(--border-default)] hover:border-[var(--accent-cyan)] hover:bg-[var(--accent-cyan-dim)] text-[var(--text-secondary)] hover:text-[var(--accent-cyan)] transition-colors text-xs font-medium"
+            style={{ fontFamily: 'var(--font-mono)' }}
           >
             <Plus className="w-4 h-4" />
             New chat
@@ -254,53 +247,55 @@ function Sidebar() {
       )}
 
       {/* Main Chat List Area */}
-      <div className={`flex-1 px-3 py-2 ${isCollapsed ? '' : 'overflow-y-auto overflow-x-hidden'}`}>
+      <div className={`flex-1 px-2 py-1 ${isCollapsed ? '' : 'overflow-y-auto overflow-x-hidden'}`}>
         {!isCollapsed && (
           <>
-            <div className={`text-xs font-semibold px-3 py-2 mb-1 uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+            <div className="text-[10px] font-medium px-2 py-2 mb-1 uppercase tracking-widest text-[var(--text-muted)]" style={{ fontFamily: 'var(--font-mono)' }}>
               Recent Chats
             </div>
 
-            <div className="space-y-1 pb-10">
+            <div className="space-y-0.5 pb-10">
               {sessions.map(session => (
                 <div key={session.id} className="relative group">
                   <button
                     onClick={() => navigate(`/chat/${session.id}`)}
-                    className={`flex items-center gap-3 w-full p-2.5 rounded-lg transition-colors text-sm truncate pr-8 ${
-                      session.id === currentSessionId 
-                        ? (isDark ? 'bg-[#212121] text-gray-100' : 'bg-gray-200 text-gray-900') 
-                        : (isDark ? 'hover:bg-[#212121] text-gray-400' : 'hover:bg-gray-200 text-gray-600')
+                    className={`flex items-center gap-2 w-full p-2 rounded transition-colors text-xs truncate pr-7 ${
+                      session.id === currentSessionId
+                        ? 'bg-[var(--accent-cyan-dim)] text-[var(--accent-cyan)]'
+                        : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
                     }`}
                   >
-                    <MessageSquare className="w-4 h-4 shrink-0" />
-                    <span className="truncate flex-1 text-left">{session.title || 'Untitled Chat'}</span>
+                    <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate flex-1 text-left" style={{ fontFamily: 'var(--font-mono)' }}>{session.title || 'Untitled Chat'}</span>
                   </button>
 
                   {/* 3-dot menu button, visible on hover */}
                   <button
                     onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === session.id ? null : session.id); }}
-                    className={`absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md transition-opacity ${openMenuId === session.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} ${isDark ? 'hover:bg-[#3c4043] text-gray-400 hover:text-white' : 'hover:bg-gray-300 text-gray-600 hover:text-gray-900'}`}
+                    className={`absolute right-1.5 top-1/2 -translate-y-1/2 p-1 rounded transition-opacity ${openMenuId === session.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]`}
                   >
-                    <MoreHorizontal className="w-4 h-4" />
+                    <MoreHorizontal className="w-3.5 h-3.5" />
                   </button>
 
                   {/* Dropdown Menu */}
                   {openMenuId === session.id && (
-                    <div 
+                    <div
                       ref={sessionMenuRef}
-                      className="absolute right-0 top-full mt-1 w-32 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#3c4043] shadow-lg py-1 z-50 overflow-hidden"
+                      className="absolute right-0 top-full mt-1 w-32 rounded border border-[var(--border-strong)] bg-[var(--bg-elevated)] shadow-xl py-1 z-50 overflow-hidden"
                     >
-                      <button 
+                      <button
                         onClick={(e) => openRenameModal(e, session)}
-                        className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 flex items-center gap-2"
+                        className="w-full text-left px-3 py-2 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] flex items-center gap-2 transition-colors"
+                        style={{ fontFamily: 'var(--font-mono)' }}
                       >
-                        <Edit2 className="w-4 h-4" /> Rename
+                        <Edit2 className="w-3.5 h-3.5" /> Rename
                       </button>
-                      <button 
+                      <button
                         onClick={(e) => openDeleteModal(e, session)}
-                        className="w-full text-left px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-white/10 flex items-center gap-2"
+                        className="w-full text-left px-3 py-2 text-xs text-[var(--accent-red)] hover:bg-[var(--accent-red-dim)] flex items-center gap-2 transition-colors"
+                        style={{ fontFamily: 'var(--font-mono)' }}
                       >
-                        <Trash2 className="w-4 h-4" /> Delete
+                        <Trash2 className="w-3.5 h-3.5" /> Delete
                       </button>
                     </div>
                   )}
@@ -311,67 +306,65 @@ function Sidebar() {
         )}
 
         {isCollapsed && (
-          <div className="flex flex-col items-center gap-2 mt-4 relative">
+          <div className="flex flex-col items-center gap-2 mt-2 relative">
              <button
                onClick={() => setRecentMenuOpen(!recentMenuOpen)}
-               className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors ${
-                 isDark ? 'hover:bg-[#212121] text-gray-400' : 'hover:bg-gray-200 text-gray-600'
-               } ${recentMenuOpen ? (isDark ? 'bg-[#212121] text-gray-200' : 'bg-gray-200 text-gray-900') : ''}`}
+               className={`w-9 h-9 flex items-center justify-center rounded transition-colors ${recentMenuOpen ? 'bg-[var(--accent-cyan-dim)] text-[var(--accent-cyan)]' : 'hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'}`}
                title="Recent Chats"
              >
-               <MessageSquare className="w-5 h-5" />
+               <MessageSquare className="w-4 h-4" />
              </button>
 
              {recentMenuOpen && (
-               <div 
+               <div
                  ref={recentMenuRef}
-                 className={`absolute left-full top-0 ml-3 w-64 rounded-xl shadow-xl border py-2 z-50 flex flex-col ${
-                   isDark ? 'bg-[#2f2f2f] border-gray-700' : 'bg-white border-gray-200'
-                 }`}
+                 className="absolute left-full top-0 ml-3 w-60 rounded border border-[var(--border-strong)] py-2 z-50 flex flex-col bg-[var(--bg-elevated)] shadow-xl"
                >
-                 <div className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                 <div className="px-4 py-2 text-[10px] font-medium uppercase tracking-widest text-[var(--text-muted)]" style={{ fontFamily: 'var(--font-mono)' }}>
                    Recents
                  </div>
-                 
+
                  <div className="space-y-0.5 pb-2">
                    {sessions.slice(0, 10).map(session => (
                      <div key={session.id} className="relative group px-2">
                        <button
                          onClick={() => navigate(`/chat/${session.id}`)}
-                         className={`flex items-center gap-3 w-full p-2.5 rounded-lg transition-colors text-sm truncate pr-8 ${
-                           session.id === currentSessionId 
-                             ? (isDark ? 'bg-[#3c4043] text-gray-100' : 'bg-gray-100 text-gray-900') 
-                             : (isDark ? 'hover:bg-[#3c4043] text-gray-300' : 'hover:bg-gray-100 text-gray-700')
+                         className={`flex items-center gap-2 w-full p-2 rounded transition-colors text-xs truncate pr-8 ${
+                           session.id === currentSessionId
+                             ? 'bg-[var(--accent-cyan-dim)] text-[var(--accent-cyan)]'
+                             : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
                          }`}
                        >
-                         <span className="truncate flex-1 text-left">{session.title || 'Untitled Chat'}</span>
+                         <span className="truncate flex-1 text-left" style={{ fontFamily: 'var(--font-mono)' }}>{session.title || 'Untitled Chat'}</span>
                        </button>
 
                        {/* 3-dot menu button */}
                        <button
                          onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === session.id ? null : session.id); }}
-                         className={`absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-md transition-opacity ${openMenuId === session.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} ${isDark ? 'hover:bg-[#4a4d51] text-gray-400 hover:text-white' : 'hover:bg-gray-200 text-gray-600 hover:text-gray-900'}`}
+                         className={`absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded transition-opacity ${openMenuId === session.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]`}
                        >
-                         <MoreHorizontal className="w-4 h-4" />
+                         <MoreHorizontal className="w-3.5 h-3.5" />
                        </button>
 
                        {/* Dropdown Menu inside Recents Popover */}
                        {openMenuId === session.id && (
-                         <div 
+                         <div
                            ref={sessionMenuRef}
-                           className="absolute right-8 top-full -mt-2 w-32 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#3c4043] shadow-lg py-1 z-60 overflow-hidden"
+                           className="absolute right-8 top-full -mt-2 w-32 rounded border border-[var(--border-strong)] bg-[var(--bg-elevated)] shadow-xl py-1 z-60 overflow-hidden"
                          >
-                           <button 
+                           <button
                              onClick={(e) => openRenameModal(e, session)}
-                             className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 flex items-center gap-2"
+                             className="w-full text-left px-3 py-2 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] flex items-center gap-2 transition-colors"
+                             style={{ fontFamily: 'var(--font-mono)' }}
                            >
-                             <Edit2 className="w-4 h-4" /> Rename
+                             <Edit2 className="w-3.5 h-3.5" /> Rename
                            </button>
-                           <button 
+                           <button
                              onClick={(e) => openDeleteModal(e, session)}
-                             className="w-full text-left px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-white/10 flex items-center gap-2"
+                             className="w-full text-left px-3 py-2 text-xs text-[var(--accent-red)] hover:bg-[var(--accent-red-dim)] flex items-center gap-2 transition-colors"
+                             style={{ fontFamily: 'var(--font-mono)' }}
                            >
-                             <Trash2 className="w-4 h-4" /> Delete
+                             <Trash2 className="w-3.5 h-3.5" /> Delete
                            </button>
                          </div>
                        )}
@@ -385,27 +378,23 @@ function Sidebar() {
       </div>
 
       {/* Bottom User Menu */}
-      <div className="p-3">
+      <div className="p-2 border-t border-[var(--border-subtle)]">
         <div className="relative w-full">
           {/* Dropdown Menu (Opens Upward) */}
           {userMenuOpen && (
-            <div className={`absolute bottom-full mb-2 rounded-xl shadow-xl border py-1.5 z-50 ${
-              isCollapsed ? 'left-full ml-3 w-60' : 'left-0 w-60'
-            } ${
-              isDark ? 'bg-[#212121] border-gray-700 text-gray-200' : 'bg-white border-gray-200 text-gray-800'
+            <div className={`absolute bottom-full mb-2 rounded border border-[var(--border-strong)] py-1 z-50 bg-[var(--bg-elevated)] shadow-xl ${
+              isCollapsed ? 'left-full ml-3 w-56' : 'left-0 w-56'
             }`}>
-              
+
               {/* Email Display */}
-              <div className={`px-4 py-3 text-sm truncate border-b ${isDark ? 'border-gray-700' : 'border-gray-100'}`}>
+              <div className="px-4 py-3 text-xs truncate border-b border-[var(--border-subtle)] text-[var(--text-muted)]" style={{ fontFamily: 'var(--font-mono)' }}>
                 {user?.email || 'No email available'}
               </div>
 
               {/* Settings */}
               <button
                 onClick={handleSettings}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors ${
-                  isDark ? 'hover:bg-[#2f2f2f]' : 'hover:bg-gray-100'
-                }`}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors"
               >
                 <Settings className="w-4 h-4" />
                 Settings
@@ -414,19 +403,15 @@ function Sidebar() {
               {/* Profile */}
               <button
                 onClick={handleManageAccount}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors ${
-                  isDark ? 'hover:bg-[#2f2f2f]' : 'hover:bg-gray-100'
-                }`}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors"
               >
                 <UserIcon className="w-4 h-4" />
                 Profile
               </button>
 
               {/* Theme Submenu Toggle */}
-              <div 
-                className={`relative w-full flex items-center justify-between px-4 py-3 text-sm transition-colors cursor-pointer ${
-                  isDark ? 'hover:bg-[#2f2f2f]' : 'hover:bg-gray-100'
-                }`}
+              <div
+                className="relative w-full flex items-center justify-between px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation()
                   setThemeSubmenuOpen(!themeSubmenuOpen)
@@ -440,10 +425,8 @@ function Sidebar() {
 
                 {/* Theme Submenu */}
                 {themeSubmenuOpen && (
-                  <div className={`absolute bottom-0 rounded-xl shadow-xl border py-1.5 z-50 w-45 ${
+                  <div className={`absolute bottom-0 rounded border border-[var(--border-strong)] py-1 z-50 w-36 bg-[var(--bg-elevated)] shadow-xl ${
                     isCollapsed ? 'left-full ml-1' : 'left-full ml-1'
-                  } ${
-                    isDark ? 'bg-[#212121] border-gray-700' : 'bg-white border-gray-200'
                   }`}>
                     {themeOptions.map((option) => {
                       const Icon = option.icon
@@ -452,15 +435,13 @@ function Sidebar() {
                         <button
                           key={option.value}
                           onClick={() => handleThemeChange(option.value)}
-                          className={`w-full flex items-center justify-between px-4 py-2 text-sm transition-colors ${
-                            isDark ? 'hover:bg-[#2f2f2f]' : 'hover:bg-gray-100'
-                          }`}
+                          className="w-full flex items-center justify-between px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors"
                         >
                           <div className="flex items-center gap-3">
                             <Icon className="w-4 h-4" />
                             {option.label}
                           </div>
-                          {isSelected && <Check className="w-4 h-4" />}
+                          {isSelected && <Check className="w-4 h-4 text-[var(--accent-cyan)]" />}
                         </button>
                       )
                     })}
@@ -471,9 +452,7 @@ function Sidebar() {
               {/* Logout */}
               <button
                 onClick={handleLogout}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors border-t ${
-                  isDark ? 'hover:bg-[#2f2f2f] border-gray-700 text-red-400' : 'hover:bg-gray-100 border-gray-100 text-red-600'
-                }`}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--accent-red)] border-t border-[var(--border-subtle)] hover:bg-[var(--accent-red-dim)] transition-colors"
               >
                 <LogOut className="w-4 h-4" />
                 Log out
@@ -484,11 +463,9 @@ function Sidebar() {
           {/* User Button (Avatar & Name) */}
           <button
             onClick={() => setUserMenuOpen(!userMenuOpen)}
-            className={`w-full flex items-center gap-3 p-2 rounded-xl transition-colors ${
-              isDark ? 'hover:bg-[#212121]' : 'hover:bg-gray-200'
-            } ${isCollapsed ? 'justify-center' : 'justify-start'}`}
+            className={`w-full flex items-center gap-2 p-1.5 rounded hover:bg-[var(--bg-hover)] transition-colors ${isCollapsed ? 'justify-center' : 'justify-start'}`}
           >
-            <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-gray-200 dark:border-gray-700">
+            <div className="w-7 h-7 rounded-full overflow-hidden shrink-0 border border-[var(--border-default)]">
               <img
                 src={avatarUrl}
                 alt="Avatar"
@@ -497,10 +474,10 @@ function Sidebar() {
             </div>
             {!isCollapsed && (
               <>
-                <span className={`text-sm font-medium truncate flex-1 text-left ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
+                <span className="text-xs font-medium truncate flex-1 text-left text-[var(--text-secondary)]" style={{ fontFamily: 'var(--font-mono)' }}>
                   {displayName}
                 </span>
-                <ChevronDown className="w-4 h-4 text-gray-500" />
+                <ChevronDown className="w-3.5 h-3.5 text-[var(--text-muted)]" />
               </>
             )}
           </button>
@@ -516,54 +493,48 @@ function Sidebar() {
 
       {/* Rename / Delete Modals */}
       {modalConfig.type && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white dark:bg-[#303134] border border-gray-200 dark:border-gray-700 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="modal-backdrop">
+          <div className="modal-box">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)]">
+              <h3 className="text-sm font-semibold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                 {modalConfig.type === 'rename' ? 'Rename Chat' : 'Delete Chat'}
               </h3>
-              <button onClick={closeModals} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                <X className="w-5 h-5" />
+              <button onClick={closeModals} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
+                <X className="w-4 h-4" />
               </button>
             </div>
-            
-            <div className="px-6 py-6">
+
+            <div className="px-6 py-5">
               {modalConfig.type === 'rename' ? (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Chat Title
-                  </label>
+                  <label className="field-label">Chat Title</label>
                   <input
                     type="text"
                     value={renameInput}
                     onChange={(e) => setRenameInput(e.target.value)}
                     autoFocus
                     onKeyDown={(e) => e.key === 'Enter' && confirmRename()}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-[#212121] text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="field-input"
                     placeholder="Enter chat title..."
                   />
                 </div>
               ) : (
-                <p className="text-gray-600 dark:text-gray-300">
-                  Are you sure you want to delete <span className="font-semibold text-gray-900 dark:text-white">"{modalConfig.session.title}"</span>? This action cannot be undone.
+                <p className="text-[var(--text-secondary)] text-sm">
+                  Are you sure you want to delete <span className="font-semibold text-[var(--text-primary)]">"{modalConfig.session.title}"</span>? This action cannot be undone.
                 </p>
               )}
             </div>
 
-            <div className="px-6 py-4 bg-gray-50 dark:bg-[#212121] border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3">
+            <div className="px-6 py-4 bg-[var(--bg-surface)] border-t border-[var(--border-subtle)] flex justify-end gap-3">
               <button
                 onClick={closeModals}
-                className="px-4 py-2 rounded-lg font-medium text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#3c4043] transition-colors"
+                className="btn-ghost"
               >
                 Cancel
               </button>
               <button
                 onClick={modalConfig.type === 'rename' ? confirmRename : confirmDelete}
-                className={`px-4 py-2 rounded-lg font-medium text-sm text-white transition-colors ${
-                  modalConfig.type === 'rename'
-                    ? 'bg-blue-600 hover:bg-blue-700'
-                    : 'bg-red-600 hover:bg-red-700'
-                }`}
+                className={modalConfig.type === 'rename' ? 'btn-primary' : 'btn-danger'}
               >
                 {modalConfig.type === 'rename' ? 'Save' : 'Delete'}
               </button>
