@@ -60,12 +60,12 @@ function SourcesPanel({ currentSession, sourceProgress, onCollapse, onOpenAddMod
   }
 
   return (
-    <div className="flex flex-col h-full bg-[var(--bg-surface)] text-[var(--text-primary)] border-r border-[var(--border-subtle)]">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-subtle)]">
-        <h2 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)' }}>Sources</h2>
+    <div className="flex flex-col h-full bg-(--bg-surface) text-(--text-primary) border-r border-(--border-subtle)">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-(--border-subtle)">
+        <h2 className="text-xs font-medium text-(--text-muted) uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)' }}>Sources</h2>
         <button
           onClick={onCollapse}
-          className="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 rounded hover:bg-[var(--bg-hover)] transition-colors"
+          className="text-(--text-muted) hover:text-(--text-primary) p-1 rounded hover:bg-(--bg-hover) transition-colors"
           title="Close Sources"
         >
           <PanelLeftClose className="w-4 h-4" />
@@ -75,7 +75,7 @@ function SourcesPanel({ currentSession, sourceProgress, onCollapse, onOpenAddMod
       <div className="px-3 py-2">
         <button
           onClick={onOpenAddModal}
-          className="w-full py-1.5 flex items-center justify-center gap-2 border border-dashed border-[var(--border-default)] rounded text-xs font-medium hover:border-[var(--accent-cyan)] hover:bg-[var(--accent-cyan-dim)] hover:text-[var(--accent-cyan)] transition-colors text-[var(--text-muted)]"
+          className="w-full py-1.5 flex items-center justify-center gap-2 border border-dashed border-(--border-default) rounded text-xs font-medium hover:border-(--accent-cyan) hover:bg-(--accent-cyan-dim) hover:text-(--accent-cyan) transition-colors text-(--text-muted)"
           style={{ fontFamily: 'var(--font-mono)' }}
         >
           <Plus className="w-3.5 h-3.5" /> Add source
@@ -84,13 +84,13 @@ function SourcesPanel({ currentSession, sourceProgress, onCollapse, onOpenAddMod
 
       <div className="px-3 pb-2">
         <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-muted)]" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-(--text-muted)" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search sources"
-            className="w-full bg-[var(--bg-elevated)] border border-transparent focus:border-[var(--accent-cyan)] rounded pl-8 pr-3 py-1.5 text-xs text-[var(--text-primary)] outline-none transition-colors placeholder:text-[var(--text-muted)]"
+            className="w-full bg-(--bg-elevated) border border-transparent focus:border-(--accent-cyan) rounded pl-8 pr-3 py-1.5 text-xs text-(--text-primary) outline-none transition-colors placeholder:text-(--text-muted)"
             style={{ fontFamily: 'var(--font-mono)' }}
           />
         </div>
@@ -100,16 +100,16 @@ function SourcesPanel({ currentSession, sourceProgress, onCollapse, onOpenAddMod
         {/* Select All Header */}
         {filteredSources.length > 0 && (
           <div
-            className="flex items-center justify-end px-2 py-2 mb-1 border-b border-[var(--border-subtle)] gap-3"
+            className="flex items-center justify-end px-2 py-2 mb-1 border-b border-(--border-subtle) gap-3"
             title={isGraphViewOpen ? 'Close Graph View to change source selection' : ''}
           >
-            <span className={`text-[10px] uppercase tracking-wider ${isGraphViewOpen ? 'text-[var(--text-muted)]' : 'text-[var(--text-secondary)]'}`} style={{ fontFamily: 'var(--font-mono)' }}>Select all</span>
+            <span className={`text-[10px] uppercase tracking-wider ${isGraphViewOpen ? 'text-(--text-muted)' : 'text-(--text-secondary)'}`} style={{ fontFamily: 'var(--font-mono)' }}>Select all</span>
             <input
               type="checkbox"
               checked={filteredSources.length > 0 && filteredSources.every(s => selectedSources.includes(s.id))}
               onChange={handleSelectAll}
               disabled={isGraphViewOpen}
-              className={`rounded border-[var(--border-default)] bg-[var(--bg-elevated)] accent-[var(--accent-cyan)] w-3.5 h-3.5 ml-1 ${isGraphViewOpen ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+              className={`rounded border-(--border-default) bg-(--bg-elevated) accent-(--accent-cyan) w-3.5 h-3.5 ml-1 ${isGraphViewOpen ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
             />
           </div>
         )}
@@ -123,42 +123,42 @@ function SourcesPanel({ currentSession, sourceProgress, onCollapse, onOpenAddMod
           const showBlink = isVectorIndexing;
 
           return (
-            <div key={source.id} className={`flex items-center justify-between p-2 rounded hover:bg-[var(--bg-elevated)] group cursor-pointer transition-colors ${showBlink ? 'animate-pulse' : ''}`}>
+            <div key={source.id} className={`flex items-center justify-between p-2 rounded hover:bg-(--bg-elevated) group cursor-pointer transition-colors ${showBlink ? 'animate-pulse' : ''}`}>
               <div
                 onClick={() => handleOpenSource && handleOpenSource(source)}
                 className="flex items-center gap-2.5 overflow-hidden flex-1"
               >
                 {isGithub ? (
-                  <GitBranch className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
+                  <GitBranch className="w-3.5 h-3.5 text-(--text-muted) shrink-0" />
                 ) : (
                   <FileIcon filename={source.title} className="w-3.5 h-3.5 shrink-0" />
                 )}
-                <span className="text-xs truncate text-[var(--text-secondary)]" style={{ fontFamily: 'var(--font-mono)' }}>{source.title}</span>
+                <span className="text-xs truncate text-(--text-secondary)" style={{ fontFamily: 'var(--font-mono)' }}>{source.title}</span>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
                 {isVectorIndexing && source.status !== 'failed' && (
-                  <span className="text-[10px] text-[var(--accent-amber)] font-medium px-1.5 py-0.5 rounded bg-[var(--accent-amber-dim)]" style={{ fontFamily: 'var(--font-mono)' }}>Vector...</span>
+                  <span className="text-[10px] text-(--accent-amber) font-medium px-1.5 py-0.5 rounded bg-(--accent-amber-dim)" style={{ fontFamily: 'var(--font-mono)' }}>Vector...</span>
                 )}
                 {!isVectorIndexing && isGraphIndexing && source.status !== 'failed' && (
-                  <span className="text-[10px] text-[var(--text-secondary)] font-medium px-1.5 py-0.5 rounded bg-[var(--bg-elevated)]" style={{ fontFamily: 'var(--font-mono)' }}>Graph...</span>
+                  <span className="text-[10px] text-(--text-secondary) font-medium px-1.5 py-0.5 rounded bg-(--bg-elevated)" style={{ fontFamily: 'var(--font-mono)' }}>Graph...</span>
                 )}
 
                 {/* 3-Dot Menu */}
                 <div className={`relative transition-opacity ${openMenuId === source.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} onClick={e => e.stopPropagation()}>
                   <button
                     onClick={() => setOpenMenuId(openMenuId === source.id ? null : source.id)}
-                    className={`p-1 rounded hover:bg-[var(--bg-hover)] transition-colors ${openMenuId === source.id ? 'text-[var(--text-primary)] bg-[var(--bg-hover)]' : 'text-[var(--text-muted)]'}`}
+                    className={`p-1 rounded hover:bg-(--bg-hover) transition-colors ${openMenuId === source.id ? 'text-(--text-primary) bg-(--bg-hover)' : 'text-(--text-muted)'}`}
                   >
                     <MoreVertical className="w-3.5 h-3.5" />
                   </button>
                   {openMenuId === source.id && (
-                    <div className="absolute right-0 top-full mt-1 w-32 bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded shadow-xl z-50">
+                    <div className="absolute right-0 top-full mt-1 w-32 bg-(--bg-elevated) border border-(--border-strong) rounded shadow-xl z-50">
                       <button
                         onClick={(e) => {
                           handleRemove(e, source.id);
                           setOpenMenuId(null);
                         }}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-xs text-[var(--accent-red)] hover:bg-[var(--accent-red-dim)] rounded transition-colors text-left"
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs text-(--accent-red) hover:bg-(--accent-red-dim) rounded transition-colors text-left"
                         style={{ fontFamily: 'var(--font-mono)' }}
                       >
                         <Trash2 className="w-3 h-3" /> Remove
@@ -173,7 +173,7 @@ function SourcesPanel({ currentSession, sourceProgress, onCollapse, onOpenAddMod
                   onChange={() => handleSelect(source.id)}
                   disabled={isGraphViewOpen}
                   title={isGraphViewOpen ? 'Close Graph View to change source selection' : ''}
-                  className={`rounded border-[var(--border-default)] bg-[var(--bg-elevated)] accent-[var(--accent-cyan)] w-3.5 h-3.5 ml-1 ${isGraphViewOpen ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                  className={`rounded border-(--border-default) bg-(--bg-elevated) accent-(--accent-cyan) w-3.5 h-3.5 ml-1 ${isGraphViewOpen ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
@@ -181,7 +181,7 @@ function SourcesPanel({ currentSession, sourceProgress, onCollapse, onOpenAddMod
           )
         })}
         {filteredSources.length === 0 && (
-          <div className="px-4 py-8 text-center text-xs text-[var(--text-muted)]" style={{ fontFamily: 'var(--font-mono)' }}>
+          <div className="px-4 py-8 text-center text-xs text-(--text-muted)" style={{ fontFamily: 'var(--font-mono)' }}>
             {searchQuery.trim() ? "No sources match your search." : "No sources attached yet."}
           </div>
         )}

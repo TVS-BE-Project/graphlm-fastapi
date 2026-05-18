@@ -18,26 +18,26 @@ export function CodeBlock({ node, className, children, ...props }) {
 
   if (isInline) {
     return (
-      <code className="bg-[var(--bg-elevated)] text-[var(--accent-cyan)] px-1.5 py-0.5 rounded text-[0.85em]" style={{ fontFamily: 'var(--font-mono)' }} {...props}>
+      <code className="bg-(--bg-elevated) text-(--accent-cyan) px-1.5 py-0.5 rounded text-[0.85em]" style={{ fontFamily: 'var(--font-mono)' }} {...props}>
         {children}
       </code>
     );
   }
 
   return (
-    <div className="relative my-4 rounded overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-elevated)]">
-      <div className="flex items-center justify-between px-4 py-2 bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] text-xs text-[var(--text-muted)]" style={{ fontFamily: 'var(--font-mono)' }}>
+    <div className="relative my-4 rounded overflow-hidden border border-(--border-subtle) bg-(--bg-elevated)">
+      <div className="flex items-center justify-between px-4 py-2 bg-(--bg-surface) border-b border-(--border-subtle) text-xs text-(--text-muted)" style={{ fontFamily: 'var(--font-mono)' }}>
         <span className="uppercase tracking-widest">{language || 'text'}</span>
         <button
           onClick={handleCopy}
-          className="flex items-center gap-1.5 hover:text-[var(--text-primary)] transition-colors"
+          className="flex items-center gap-1.5 hover:text-(--text-primary) transition-colors"
           aria-label="Copy code"
         >
-          {isCopied ? <Check className="w-3.5 h-3.5 text-[var(--accent-cyan)]" /> : <Copy className="w-3.5 h-3.5" />}
+          {isCopied ? <Check className="w-3.5 h-3.5 text-(--accent-cyan)" /> : <Copy className="w-3.5 h-3.5" />}
           {isCopied ? 'Copied!' : 'Copy'}
         </button>
       </div>
-      <div className="p-4 overflow-x-auto text-sm text-[var(--text-secondary)]" style={{ fontFamily: 'var(--font-mono)' }}>
+      <div className="p-4 overflow-x-auto text-sm text-(--text-secondary)" style={{ fontFamily: 'var(--font-mono)' }}>
         <code className={className} {...props}>
           {children}
         </code>

@@ -35,17 +35,17 @@ function CanvasPanel({ onCollapse, currentSession, selectedSources = [], onActiv
   }
 
   return (
-    <div className="flex flex-col h-full bg-[var(--bg-surface)] text-[var(--text-primary)] border-l border-[var(--border-subtle)]">
+    <div className="flex flex-col h-full bg-(--bg-surface) text-(--text-primary) border-l border-(--border-subtle)">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-subtle)] shrink-0">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-(--border-subtle) shrink-0">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-1 text-xs font-medium min-w-0" style={{ fontFamily: 'var(--font-mono)' }}>
           <button
             onClick={handleBack}
             className={`flex items-center gap-1.5 transition-colors uppercase tracking-widest ${
               activeTool
-                ? 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-                : 'text-[var(--text-muted)] cursor-default'
+                ? 'text-(--text-muted) hover:text-(--text-primary)'
+                : 'text-(--text-muted) cursor-default'
             }`}
           >
             <LayoutTemplate className="w-3.5 h-3.5 shrink-0" />
@@ -54,8 +54,8 @@ function CanvasPanel({ onCollapse, currentSession, selectedSources = [], onActiv
 
           {activeTool && (
             <>
-              <ChevronRight className="w-3 h-3 text-[var(--text-muted)] shrink-0" />
-              <span className="text-[var(--text-secondary)] truncate uppercase tracking-widest">
+              <ChevronRight className="w-3 h-3 text-(--text-muted) shrink-0" />
+              <span className="text-(--text-secondary) truncate uppercase tracking-widest">
                 {TOOL_LABELS[activeTool]}
               </span>
             </>
@@ -64,7 +64,7 @@ function CanvasPanel({ onCollapse, currentSession, selectedSources = [], onActiv
 
         <button
           onClick={handleCollapse}
-          className="shrink-0 ml-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 rounded hover:bg-[var(--bg-hover)] transition-colors"
+          className="shrink-0 ml-2 text-(--text-muted) hover:text-(--text-primary) p-1 rounded hover:bg-(--bg-hover) transition-colors"
           title="Close Canvas"
         >
           <PanelRightClose className="w-4 h-4" />

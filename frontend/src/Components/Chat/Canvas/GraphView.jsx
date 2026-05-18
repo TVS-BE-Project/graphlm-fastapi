@@ -181,15 +181,15 @@ export function GraphView({ currentSession, graphData, syncMode, onSetSyncMode, 
       {/* Graph canvas */}
       <div
         ref={containerRef}
-        className="w-full h-full rounded"
-        style={{ minHeight: 300, background: '#111113' }}
+        className="w-full h-full rounded bg-(--bg-surface)"
+        style={{ minHeight: 300 }}
       />
 
       {/* Overlay: loading */}
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center rounded" style={{ background: 'rgba(17,17,19,0.7)' }}>
-          <div className="flex flex-col items-center gap-2 text-[var(--text-muted)]">
-            <Loader2 className="w-6 h-6 animate-spin text-[var(--accent-cyan)]" />
+        <div className="absolute inset-0 flex items-center justify-center rounded bg-white/80 dark:bg-black/70 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-2 text-(--text-muted)">
+            <Loader2 className="w-6 h-6 animate-spin text-(--accent-cyan)" />
             <span className="text-xs" style={{ fontFamily: 'var(--font-mono)' }}>Building graph…</span>
           </div>
         </div>
@@ -198,14 +198,14 @@ export function GraphView({ currentSession, graphData, syncMode, onSetSyncMode, 
       {/* Overlay: empty / error */}
       {!isLoading && isEmpty && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center px-6">
-          <div className="w-10 h-10 rounded bg-[var(--accent-cyan-dim)] flex items-center justify-center">
-            <NetworkIcon className="w-5 h-5 text-[var(--accent-cyan)]" />
+          <div className="w-10 h-10 rounded bg-(--accent-cyan-dim) flex items-center justify-center">
+            <NetworkIcon className="w-5 h-5 text-(--accent-cyan)" />
           </div>
-          <p className="text-xs font-medium text-[var(--text-secondary)]" style={{ fontFamily: 'var(--font-mono)' }}>
+          <p className="text-xs font-medium text-(--text-secondary)" style={{ fontFamily: 'var(--font-mono)' }}>
             {errorMsg || (mode === 'sync' ? 'Graph updates from chat will appear here' : 'No graph data yet')}
           </p>
           {mode === 'explore' && !errorMsg && (
-            <p className="text-xs text-[var(--text-muted)]" style={{ fontFamily: 'var(--font-mono)' }}>
+            <p className="text-xs text-(--text-muted)" style={{ fontFamily: 'var(--font-mono)' }}>
               Enter a query below or load the full graph
             </p>
           )}
@@ -215,7 +215,7 @@ export function GraphView({ currentSession, graphData, syncMode, onSetSyncMode, 
       {/* Node/edge counter badge */}
       {!isEmpty && (
         <div className="absolute bottom-2 right-2 flex gap-1.5">
-          <span className="text-[10px] px-2 py-0.5 rounded bg-[var(--bg-elevated)]/80 backdrop-blur text-[var(--text-muted)] border border-[var(--border-default)]" style={{ fontFamily: 'var(--font-mono)' }}>
+          <span className="text-[10px] px-2 py-0.5 rounded bg-(--bg-elevated)/80 backdrop-blur text-(--text-muted) border border-(--border-default)" style={{ fontFamily: 'var(--font-mono)' }}>
             {nodeCount}N · {edgeCount}E
           </span>
         </div>
@@ -226,7 +226,7 @@ export function GraphView({ currentSession, graphData, syncMode, onSetSyncMode, 
         <button
           onClick={handleLoadFullGraph}
           title="Reload full graph"
-          className="absolute top-2 right-2 p-1.5 rounded bg-[var(--bg-elevated)]/80 backdrop-blur border border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--accent-cyan)] hover:border-[var(--accent-cyan)] transition-colors"
+          className="absolute top-2 right-2 p-1.5 rounded bg-(--bg-elevated)/80 backdrop-blur border border-(--border-default) text-(--text-muted) hover:text-(--accent-cyan) hover:border-(--accent-cyan) transition-colors"
         >
           <RefreshCw className="w-3.5 h-3.5" />
         </button>
@@ -236,11 +236,11 @@ export function GraphView({ currentSession, graphData, syncMode, onSetSyncMode, 
 
   if (isFullscreen) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col bg-[var(--bg-base)]">
+      <div className="fixed inset-0 z-50 flex flex-col bg-(--bg-base)">
         {/* Fullscreen header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-subtle)]">
-          <span className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)' }}>Graph View — Fullscreen</span>
-          <button onClick={() => setIsFullscreen(false)} className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-(--border-subtle)">
+          <span className="text-xs font-semibold text-(--text-secondary) uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)' }}>Graph View — Fullscreen</span>
+          <button onClick={() => setIsFullscreen(false)} className="p-1.5 rounded hover:bg-(--bg-hover) text-(--text-muted) hover:text-(--text-primary) transition-colors">
             <Minimize2 className="w-4 h-4" />
           </button>
         </div>
@@ -251,16 +251,16 @@ export function GraphView({ currentSession, graphData, syncMode, onSetSyncMode, 
         {mode === 'explore' && (
           <form onSubmit={handleExploreQuery} className="px-4 pb-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-muted)]" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-(--text-muted)" />
               <input
                 type="text"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="Search the graph…"
-                className="w-full pl-9 pr-12 py-2 text-xs border border-[var(--border-default)] rounded-full bg-[var(--bg-elevated)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-cyan)] placeholder:text-[var(--text-muted)]"
+                className="w-full pl-9 pr-12 py-2 text-xs border border-(--border-default) rounded-full bg-(--bg-elevated) text-(--text-primary) focus:outline-none focus:border-(--accent-cyan) placeholder:text-(--text-muted)"
                 style={{ fontFamily: 'var(--font-mono)' }}
               />
-              <button type="submit" disabled={!query.trim() || isLoading} className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-[var(--accent-cyan)] text-[var(--text-inverse)] disabled:opacity-40 hover:bg-[#00b588] transition-colors">
+              <button type="submit" disabled={!query.trim() || isLoading} className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-(--accent-cyan) text-(--text-inverse) disabled:opacity-40 hover:bg-[#00b588] transition-colors">
                 <Search className="w-3 h-3" />
               </button>
             </div>
@@ -273,17 +273,17 @@ export function GraphView({ currentSession, graphData, syncMode, onSetSyncMode, 
   return (
     <div className="flex flex-col h-full gap-0">
       {/* Mode toggle + fullscreen */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--border-subtle)]">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-(--border-subtle)">
         {/* Sync / Explore toggle */}
-        <div className="flex items-center gap-0.5 bg-[var(--bg-elevated)] rounded p-0.5">
+        <div className="flex items-center gap-0.5 bg-(--bg-elevated) rounded p-0.5">
           {['sync', 'explore'].map(m => (
             <button
               key={m}
               onClick={() => onSetSyncMode(m === 'sync')}
               className={`px-3 py-1 text-[10px] font-medium rounded transition-colors capitalize ${
                 mode === m
-                  ? 'bg-[var(--accent-cyan-dim)] text-[var(--accent-cyan)]'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
+                  ? 'bg-(--accent-cyan-dim) text-(--accent-cyan)'
+                  : 'text-(--text-muted) hover:text-(--text-secondary)'
               }`}
               style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}
             >
@@ -297,7 +297,7 @@ export function GraphView({ currentSession, graphData, syncMode, onSetSyncMode, 
           <button
             onClick={handleLoadFullGraph}
             title="Load full graph"
-            className="p-1.5 rounded text-[var(--text-muted)] hover:text-[var(--accent-cyan)] hover:bg-[var(--bg-hover)] transition-colors"
+            className="p-1.5 rounded text-(--text-muted) hover:text-(--accent-cyan) hover:bg-(--bg-hover) transition-colors"
           >
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
@@ -305,7 +305,7 @@ export function GraphView({ currentSession, graphData, syncMode, onSetSyncMode, 
           <button
             onClick={() => setIsFullscreen(true)}
             title="Expand graph"
-            className="p-1.5 rounded text-[var(--text-muted)] hover:text-[var(--accent-cyan)] hover:bg-[var(--bg-hover)] transition-colors"
+            className="p-1.5 rounded text-(--text-muted) hover:text-(--accent-cyan) hover:bg-(--bg-hover) transition-colors"
           >
             <Maximize2 className="w-3.5 h-3.5" />
           </button>
@@ -321,19 +321,19 @@ export function GraphView({ currentSession, graphData, syncMode, onSetSyncMode, 
       {mode === 'explore' && (
         <form onSubmit={handleExploreQuery} className="px-3 pb-3">
           <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-[var(--text-muted)]" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-(--text-muted)" />
             <input
               type="text"
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="Search the knowledge graph…"
-              className="w-full pl-7 pr-9 py-1.5 text-xs border border-[var(--border-default)] rounded-full bg-[var(--bg-elevated)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-cyan)] placeholder:text-[var(--text-muted)] transition-colors"
+              className="w-full pl-7 pr-9 py-1.5 text-xs border border-(--border-default) rounded-full bg-(--bg-elevated) text-(--text-primary) focus:outline-none focus:border-(--accent-cyan) placeholder:text-(--text-muted) transition-colors"
               style={{ fontFamily: 'var(--font-mono)' }}
             />
             <button
               type="submit"
               disabled={!query.trim() || isLoading}
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 rounded-full bg-[var(--accent-cyan)] text-[var(--text-inverse)] disabled:opacity-40 hover:bg-[#00b588] transition-colors"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 rounded-full bg-(--accent-cyan) text-(--text-inverse) disabled:opacity-40 hover:bg-[#00b588] transition-colors"
             >
               <Search className="w-2.5 h-2.5" />
             </button>
@@ -343,7 +343,7 @@ export function GraphView({ currentSession, graphData, syncMode, onSetSyncMode, 
 
       {/* Sync mode hint */}
       {mode === 'sync' && (
-        <p className="px-4 pb-3 text-[10px] text-center text-[var(--text-muted)]" style={{ fontFamily: 'var(--font-mono)' }}>
+        <p className="px-4 pb-3 text-[10px] text-center text-(--text-muted)" style={{ fontFamily: 'var(--font-mono)' }}>
           Graph will auto-update as you chat
         </p>
       )}

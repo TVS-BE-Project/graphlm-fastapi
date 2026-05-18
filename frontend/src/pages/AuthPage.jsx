@@ -111,11 +111,11 @@ function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center p-4">
-      <div className="bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded-md w-full max-w-md overflow-hidden shadow-xl">
+    <div className="min-h-screen bg-(--bg-base) flex items-center justify-center p-4">
+      <div className="bg-(--bg-elevated) border border-(--border-strong) rounded-md w-full max-w-md overflow-hidden shadow-xl">
         {/* Header */}
-        <div className="px-8 pt-8 pb-6 border-b border-[var(--border-subtle)]">
-          <h2 className="text-xl font-semibold text-[var(--text-primary)] text-center" style={{ fontFamily: 'var(--font-mono)' }}>
+        <div className="px-8 pt-8 pb-6 border-b border-(--border-subtle)">
+          <h2 className="text-xl font-semibold text-(--text-primary) text-center" style={{ fontFamily: 'var(--font-mono)' }}>
             {authMode === 'login' ? 'Login' : 'Create Account'}
           </h2>
         </div>
@@ -126,7 +126,7 @@ function AuthPage() {
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               {/* OAuth Error Message */}
               {searchParams.get('error') && (
-                <div className="p-3 bg-[var(--accent-amber-dim)] text-[var(--accent-amber)] rounded border border-[var(--accent-amber)]/30 text-sm">
+                <div className="p-3 bg-(--accent-amber-dim) text-(--accent-amber) rounded border border-(--accent-amber)/30 text-sm">
                   <p className="font-medium mb-1">GitHub Authentication Failed</p>
                   <p>{getErrorMessage(searchParams.get('error'))}</p>
                 </div>
@@ -159,7 +159,7 @@ function AuthPage() {
                 <button
                   type="button"
                   onClick={() => navigate('/forgot-password')}
-                  className="mt-2 text-xs text-[var(--accent-cyan)] hover:underline"
+                  className="mt-2 text-xs text-(--accent-cyan) hover:underline"
                   style={{ fontFamily: 'var(--font-mono)' }}
                 >
                   Forgot Password?
@@ -167,7 +167,7 @@ function AuthPage() {
               </div>
 
               {error && (
-                <div className="p-3 bg-[var(--accent-red-dim)] text-[var(--accent-red)] border border-[var(--accent-red)]/30 rounded text-sm">
+                <div className="p-3 bg-(--accent-red-dim) text-(--accent-red) border border-(--accent-red)/30 rounded text-sm">
                   {error}
                 </div>
               )}
@@ -182,10 +182,10 @@ function AuthPage() {
 
               <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-[var(--border-subtle)]"></div>
+                  <div className="w-full border-t border-(--border-subtle)"></div>
                 </div>
                 <div className="relative flex justify-center text-xs">
-                  <span className="px-3 bg-[var(--bg-elevated)] text-[var(--text-muted)]" style={{ fontFamily: 'var(--font-mono)' }}>or</span>
+                  <span className="px-3 bg-(--bg-elevated) text-(--text-muted)" style={{ fontFamily: 'var(--font-mono)' }}>or</span>
                 </div>
               </div>
 
@@ -279,7 +279,7 @@ function AuthPage() {
               </div>
 
               {error && (
-                <div className="p-3 bg-[var(--accent-red-dim)] text-[var(--accent-red)] border border-[var(--accent-red)]/30 rounded text-sm">
+                <div className="p-3 bg-(--accent-red-dim) text-(--accent-red) border border-(--accent-red)/30 rounded text-sm">
                   {error}
                 </div>
               )}
@@ -294,10 +294,10 @@ function AuthPage() {
 
               <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-[var(--border-subtle)]"></div>
+                  <div className="w-full border-t border-(--border-subtle)"></div>
                 </div>
                 <div className="relative flex justify-center text-xs">
-                  <span className="px-3 bg-[var(--bg-elevated)] text-[var(--text-muted)]" style={{ fontFamily: 'var(--font-mono)' }}>or</span>
+                  <span className="px-3 bg-(--bg-elevated) text-(--text-muted)" style={{ fontFamily: 'var(--font-mono)' }}>or</span>
                 </div>
               </div>
 
@@ -312,11 +312,11 @@ function AuthPage() {
             </form>
           )}
 
-          <p className="text-center text-[var(--text-secondary)] text-sm mt-6">
+          <p className="text-center text-(--text-secondary) text-sm mt-6">
             {authMode === 'login' ? "Don't have an account? " : 'Already have an account? '}
             <button
               onClick={toggleAuthMode}
-              className="text-[var(--accent-cyan)] hover:underline font-medium"
+              className="text-(--accent-cyan) hover:underline font-medium"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
               {authMode === 'login' ? 'Sign up' : 'Login'}

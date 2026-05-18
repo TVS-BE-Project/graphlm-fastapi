@@ -81,16 +81,16 @@ function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center p-4">
-      <div className="bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded-md w-full max-w-md overflow-hidden shadow-xl">
+    <div className="min-h-screen bg-(--bg-base) flex items-center justify-center p-4">
+      <div className="bg-(--bg-elevated) border border-(--border-strong) rounded-md w-full max-w-md overflow-hidden shadow-xl">
         <div className="p-8 text-center">
           {(status === 'idle' || status === 'loading') && (
             <>
-              <Lock className="w-12 h-12 text-[var(--accent-cyan)] mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
+              <Lock className="w-12 h-12 text-(--accent-cyan) mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-(--text-primary) mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
                 Set New Password
               </h2>
-              <p className="text-[var(--text-secondary)] mb-6 text-sm">
+              <p className="text-(--text-secondary) mb-6 text-sm">
                 Enter your new password below.
               </p>
 
@@ -118,7 +118,7 @@ function ResetPasswordPage() {
                 </div>
 
                 {error && (
-                  <div className="text-sm text-[var(--accent-red)] bg-[var(--accent-red-dim)] border border-[var(--accent-red)]/30 rounded px-3 py-2">{error}</div>
+                  <div className="text-sm text-(--accent-red) bg-(--accent-red-dim) border border-(--accent-red)/30 rounded px-3 py-2">{error}</div>
                 )}
 
                 <button
@@ -132,7 +132,7 @@ function ResetPasswordPage() {
 
               <button
                 onClick={() => navigate('/auth?mode=login')}
-                className="w-full text-[var(--accent-cyan)] hover:underline text-sm font-medium py-2 px-4 mt-4"
+                className="w-full text-(--accent-cyan) hover:underline text-sm font-medium py-2 px-4 mt-4"
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
                 Back to Login
@@ -142,11 +142,11 @@ function ResetPasswordPage() {
 
           {status === 'success' && (
             <>
-              <CheckCircle className="w-12 h-12 text-[var(--accent-cyan)] mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
+              <CheckCircle className="w-12 h-12 text-(--accent-cyan) mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-(--text-primary) mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
                 Password Reset!
               </h2>
-              <p className="text-[var(--text-secondary)] mb-6 text-sm">
+              <p className="text-(--text-secondary) mb-6 text-sm">
                 Your password has been reset successfully. You can now login with your new password.
               </p>
 
@@ -161,11 +161,11 @@ function ResetPasswordPage() {
 
           {status === 'error' && (
             <>
-              <AlertCircle className="w-12 h-12 text-[var(--accent-red)] mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
+              <AlertCircle className="w-12 h-12 text-(--accent-red) mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-(--text-primary) mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
                 Reset Failed
               </h2>
-              <p className="text-[var(--text-secondary)] mb-6 text-sm">{error}</p>
+              <p className="text-(--text-secondary) mb-6 text-sm">{error}</p>
 
               {!showResend && (
                 <button
@@ -183,7 +183,7 @@ function ResetPasswordPage() {
 
               {showResend && (
                 <>
-                  <form onSubmit={handleResendEmail} className="space-y-3 mt-4 pt-4 border-t border-[var(--border-subtle)] text-left">
+                  <form onSubmit={handleResendEmail} className="space-y-3 mt-4 pt-4 border-t border-(--border-subtle) text-left">
                     <input
                       type="email"
                       value={email}
@@ -203,7 +203,7 @@ function ResetPasswordPage() {
 
               <button
                 onClick={() => navigate('/auth?mode=login')}
-                className="w-full text-[var(--accent-cyan)] hover:underline text-sm font-medium py-2 px-4 mt-3"
+                className="w-full text-(--accent-cyan) hover:underline text-sm font-medium py-2 px-4 mt-3"
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
                 Back to Login

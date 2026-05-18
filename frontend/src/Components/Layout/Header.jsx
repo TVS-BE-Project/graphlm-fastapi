@@ -83,7 +83,7 @@ function AppHeader() {
 
   return (
     <header
-      className="bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] shrink-0 text-[var(--text-primary)]"
+      className="bg-(--bg-surface) border-b border-(--border-subtle) shrink-0 text-(--text-primary)"
       ref={menuRootRef}
     >
       <div className="h-14 px-6 flex items-center justify-between gap-4">
@@ -91,10 +91,10 @@ function AppHeader() {
           onClick={() => navigate('/dashboard')}
           className="flex items-center gap-2"
         >
-          <div className="w-7 h-7 rounded bg-[var(--accent-cyan-dim)] flex items-center justify-center">
-            <Monitor className="w-4 h-4 text-[var(--accent-cyan)]" />
+          <div className="w-7 h-7 rounded bg-(--accent-cyan-dim) flex items-center justify-center">
+            <Monitor className="w-4 h-4 text-(--accent-cyan)" />
           </div>
-          <h1 className="text-base font-semibold tracking-wide text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-mono)' }}>
+          <h1 className="text-base font-semibold tracking-wide text-(--text-primary)" style={{ fontFamily: 'var(--font-mono)' }}>
             GraphLM
           </h1>
         </button>
@@ -105,7 +105,7 @@ function AppHeader() {
               setThemeSubmenuOpen(false)
               setUserMenuOpen(!userMenuOpen)
             }}
-            className="flex items-center justify-center rounded-full ring-1 ring-[var(--border-default)] hover:ring-[var(--accent-cyan)] transition-all p-0.5"
+            className="flex items-center justify-center rounded-full ring-1 ring-(--border-default) hover:ring-(--accent-cyan) transition-all p-0.5"
             aria-haspopup="menu"
             aria-expanded={userMenuOpen}
           >
@@ -119,17 +119,17 @@ function AppHeader() {
 
           {/* Dropdown Menu (Opens Downward) */}
           {userMenuOpen && (
-            <div className="absolute top-full right-0 mt-2 w-56 rounded border border-[var(--border-strong)] py-1 z-50 bg-[var(--bg-elevated)] text-[var(--text-primary)] shadow-xl">
+            <div className="absolute top-full right-0 mt-2 w-56 rounded border border-(--border-strong) py-1 z-50 bg-(--bg-elevated) text-(--text-primary) shadow-xl">
 
               {/* Email Display */}
-              <div className="px-4 py-3 text-xs truncate border-b border-[var(--border-subtle)] text-[var(--text-muted)]" style={{ fontFamily: 'var(--font-mono)' }}>
+              <div className="px-4 py-3 text-xs truncate border-b border-(--border-subtle) text-(--text-muted)" style={{ fontFamily: 'var(--font-mono)' }}>
                 {user?.email || 'No email available'}
               </div>
 
               {/* Settings */}
               <button
                 onClick={handleSettings}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-(--text-secondary) transition-colors hover:bg-(--bg-hover) hover:text-(--text-primary)"
               >
                 <Settings className="w-4 h-4" />
                 Settings
@@ -138,7 +138,7 @@ function AppHeader() {
               {/* Profile */}
               <button
                 onClick={handleManageAccount}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-(--text-secondary) transition-colors hover:bg-(--bg-hover) hover:text-(--text-primary)"
               >
                 <UserIcon className="w-4 h-4" />
                 Profile
@@ -147,7 +147,7 @@ function AppHeader() {
               {/* Theme Submenu */}
               <div className="relative group">
                 <button
-                  className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+                  className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-(--text-secondary) transition-colors hover:bg-(--bg-hover) hover:text-(--text-primary)"
                   onMouseEnter={() => setThemeSubmenuOpen(true)}
                   onClick={() => setThemeSubmenuOpen(!themeSubmenuOpen)}
                 >
@@ -160,7 +160,7 @@ function AppHeader() {
 
                 {themeSubmenuOpen && (
                   <div
-                    className="absolute top-0 right-full mr-1 w-36 rounded border border-[var(--border-strong)] py-1 z-50 bg-[var(--bg-elevated)] shadow-xl"
+                    className="absolute top-0 right-full mr-1 w-36 rounded border border-(--border-strong) py-1 z-50 bg-(--bg-elevated) shadow-xl"
                     onMouseLeave={() => setThemeSubmenuOpen(false)}
                   >
                     {themeOptions.map((option) => {
@@ -170,13 +170,13 @@ function AppHeader() {
                         <button
                           key={option.value}
                           onClick={() => handleThemeChange(option.value)}
-                          className="w-full flex items-center justify-between px-4 py-2 text-sm text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+                          className="w-full flex items-center justify-between px-4 py-2 text-sm text-(--text-secondary) transition-colors hover:bg-(--bg-hover) hover:text-(--text-primary)"
                         >
                           <div className="flex items-center gap-3">
                             <Icon className="w-4 h-4" />
                             {option.label}
                           </div>
-                          {isSelected && <Check className="w-4 h-4 text-[var(--accent-cyan)]" />}
+                          {isSelected && <Check className="w-4 h-4 text-(--accent-cyan)" />}
                         </button>
                       )
                     })}
@@ -184,12 +184,12 @@ function AppHeader() {
                 )}
               </div>
 
-              <div className="border-t my-1 border-[var(--border-subtle)]" />
+              <div className="border-t my-1 border-(--border-subtle)" />
 
               {/* Logout */}
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--accent-red)] transition-colors hover:bg-[var(--accent-red-dim)]"
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-(--accent-red) transition-colors hover:bg-(--accent-red-dim)"
               >
                 <LogOut className="w-4 h-4" />
                 Log out

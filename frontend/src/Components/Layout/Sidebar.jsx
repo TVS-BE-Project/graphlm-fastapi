@@ -190,7 +190,7 @@ function Sidebar() {
 
   return (
     <aside
-      className={`h-screen flex flex-col shrink-0 border-r border-[var(--border-subtle)] bg-[var(--bg-surface)] transition-all duration-300 ease-in-out ${sidebarWidth}`}
+      className={`h-screen flex flex-col shrink-0 border-r border-(--border-subtle) bg-(--bg-surface) transition-all duration-300 ease-in-out ${sidebarWidth}`}
       ref={menuRootRef}
     >
       {/* Top Header / Collapse Toggle */}
@@ -200,21 +200,21 @@ function Sidebar() {
             onMouseEnter={() => setTopLogoHovered(true)}
             onMouseLeave={() => setTopLogoHovered(false)}
             onClick={() => setIsCollapsed(false)}
-            className="w-9 h-9 flex items-center justify-center rounded hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors mx-auto"
+            className="w-9 h-9 flex items-center justify-center rounded hover:bg-(--bg-hover) text-(--text-muted) hover:text-(--text-primary) transition-colors mx-auto"
           >
             {topLogoHovered ? <PanelLeftOpen className="w-4 h-4" /> : <Monitor className="w-4 h-4" />}
           </button>
         ) : (
           <>
             <div className="flex items-center gap-2 ml-1">
-              <div className="w-6 h-6 rounded bg-[var(--accent-cyan-dim)] flex items-center justify-center">
-                <Monitor className="w-3.5 h-3.5 text-[var(--accent-cyan)]" />
+              <div className="w-6 h-6 rounded bg-(--accent-cyan-dim) flex items-center justify-center">
+                <Monitor className="w-3.5 h-3.5 text-(--accent-cyan)" />
               </div>
-              <span className="text-sm font-semibold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-mono)' }}>GraphLM</span>
+              <span className="text-sm font-semibold text-(--text-primary)" style={{ fontFamily: 'var(--font-mono)' }}>GraphLM</span>
             </div>
             <button
               onClick={() => setIsCollapsed(true)}
-              className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+              className="p-1.5 rounded hover:bg-(--bg-hover) text-(--text-muted) hover:text-(--text-primary) transition-colors"
             >
               <PanelLeftClose className="w-4 h-4" />
             </button>
@@ -227,7 +227,7 @@ function Sidebar() {
         <div className="px-3 pb-2 flex justify-center">
           <button
             onClick={handleNewChat}
-            className="w-9 h-9 flex items-center justify-center rounded hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--accent-cyan)] transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded hover:bg-(--bg-hover) text-(--text-muted) hover:text-(--accent-cyan) transition-colors"
             title="New Chat"
           >
             <Plus className="w-4 h-4" />
@@ -237,7 +237,7 @@ function Sidebar() {
         <div className="px-3 pb-2">
           <button
             onClick={handleNewChat}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded border border-[var(--border-default)] hover:border-[var(--accent-cyan)] hover:bg-[var(--accent-cyan-dim)] text-[var(--text-secondary)] hover:text-[var(--accent-cyan)] transition-colors text-xs font-medium"
+            className="w-full flex items-center gap-2 px-3 py-2 rounded border border-(--border-default) hover:border-(--accent-cyan) hover:bg-(--accent-cyan-dim) text-(--text-secondary) hover:text-(--accent-cyan) transition-colors text-xs font-medium"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
             <Plus className="w-4 h-4" />
@@ -250,7 +250,7 @@ function Sidebar() {
       <div className={`flex-1 px-2 py-1 ${isCollapsed ? '' : 'overflow-y-auto overflow-x-hidden'}`}>
         {!isCollapsed && (
           <>
-            <div className="text-[10px] font-medium px-2 py-2 mb-1 uppercase tracking-widest text-[var(--text-muted)]" style={{ fontFamily: 'var(--font-mono)' }}>
+            <div className="text-[10px] font-medium px-2 py-2 mb-1 uppercase tracking-widest text-(--text-muted)" style={{ fontFamily: 'var(--font-mono)' }}>
               Recent Chats
             </div>
 
@@ -261,8 +261,8 @@ function Sidebar() {
                     onClick={() => navigate(`/chat/${session.id}`)}
                     className={`flex items-center gap-2 w-full p-2 rounded transition-colors text-xs truncate pr-7 ${
                       session.id === currentSessionId
-                        ? 'bg-[var(--accent-cyan-dim)] text-[var(--accent-cyan)]'
-                        : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
+                        ? 'bg-(--accent-cyan-dim) text-(--accent-cyan)'
+                        : 'text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--text-primary)'
                     }`}
                   >
                     <MessageSquare className="w-3.5 h-3.5 shrink-0" />
@@ -272,7 +272,7 @@ function Sidebar() {
                   {/* 3-dot menu button, visible on hover */}
                   <button
                     onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === session.id ? null : session.id); }}
-                    className={`absolute right-1.5 top-1/2 -translate-y-1/2 p-1 rounded transition-opacity ${openMenuId === session.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]`}
+                    className={`absolute right-1.5 top-1/2 -translate-y-1/2 p-1 rounded transition-opacity ${openMenuId === session.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} text-(--text-muted) hover:bg-(--bg-hover) hover:text-(--text-primary)`}
                   >
                     <MoreHorizontal className="w-3.5 h-3.5" />
                   </button>
@@ -281,18 +281,18 @@ function Sidebar() {
                   {openMenuId === session.id && (
                     <div
                       ref={sessionMenuRef}
-                      className="absolute right-0 top-full mt-1 w-32 rounded border border-[var(--border-strong)] bg-[var(--bg-elevated)] shadow-xl py-1 z-50 overflow-hidden"
+                      className="absolute right-0 top-full mt-1 w-32 rounded border border-(--border-strong) bg-(--bg-elevated) shadow-xl py-1 z-50 overflow-hidden"
                     >
                       <button
                         onClick={(e) => openRenameModal(e, session)}
-                        className="w-full text-left px-3 py-2 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] flex items-center gap-2 transition-colors"
+                        className="w-full text-left px-3 py-2 text-xs text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--text-primary) flex items-center gap-2 transition-colors"
                         style={{ fontFamily: 'var(--font-mono)' }}
                       >
                         <Edit2 className="w-3.5 h-3.5" /> Rename
                       </button>
                       <button
                         onClick={(e) => openDeleteModal(e, session)}
-                        className="w-full text-left px-3 py-2 text-xs text-[var(--accent-red)] hover:bg-[var(--accent-red-dim)] flex items-center gap-2 transition-colors"
+                        className="w-full text-left px-3 py-2 text-xs text-(--accent-red) hover:bg-(--accent-red-dim) flex items-center gap-2 transition-colors"
                         style={{ fontFamily: 'var(--font-mono)' }}
                       >
                         <Trash2 className="w-3.5 h-3.5" /> Delete
@@ -309,7 +309,7 @@ function Sidebar() {
           <div className="flex flex-col items-center gap-2 mt-2 relative">
              <button
                onClick={() => setRecentMenuOpen(!recentMenuOpen)}
-               className={`w-9 h-9 flex items-center justify-center rounded transition-colors ${recentMenuOpen ? 'bg-[var(--accent-cyan-dim)] text-[var(--accent-cyan)]' : 'hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'}`}
+               className={`w-9 h-9 flex items-center justify-center rounded transition-colors ${recentMenuOpen ? 'bg-(--accent-cyan-dim) text-(--accent-cyan)' : 'hover:bg-(--bg-hover) text-(--text-muted) hover:text-(--text-primary)'}`}
                title="Recent Chats"
              >
                <MessageSquare className="w-4 h-4" />
@@ -318,9 +318,9 @@ function Sidebar() {
              {recentMenuOpen && (
                <div
                  ref={recentMenuRef}
-                 className="absolute left-full top-0 ml-3 w-60 rounded border border-[var(--border-strong)] py-2 z-50 flex flex-col bg-[var(--bg-elevated)] shadow-xl"
+                 className="absolute left-full top-0 ml-3 w-60 rounded border border-(--border-strong) py-2 z-50 flex flex-col bg-(--bg-elevated) shadow-xl"
                >
-                 <div className="px-4 py-2 text-[10px] font-medium uppercase tracking-widest text-[var(--text-muted)]" style={{ fontFamily: 'var(--font-mono)' }}>
+                 <div className="px-4 py-2 text-[10px] font-medium uppercase tracking-widest text-(--text-muted)" style={{ fontFamily: 'var(--font-mono)' }}>
                    Recents
                  </div>
 
@@ -331,8 +331,8 @@ function Sidebar() {
                          onClick={() => navigate(`/chat/${session.id}`)}
                          className={`flex items-center gap-2 w-full p-2 rounded transition-colors text-xs truncate pr-8 ${
                            session.id === currentSessionId
-                             ? 'bg-[var(--accent-cyan-dim)] text-[var(--accent-cyan)]'
-                             : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
+                             ? 'bg-(--accent-cyan-dim) text-(--accent-cyan)'
+                             : 'text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--text-primary)'
                          }`}
                        >
                          <span className="truncate flex-1 text-left" style={{ fontFamily: 'var(--font-mono)' }}>{session.title || 'Untitled Chat'}</span>
@@ -341,7 +341,7 @@ function Sidebar() {
                        {/* 3-dot menu button */}
                        <button
                          onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === session.id ? null : session.id); }}
-                         className={`absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded transition-opacity ${openMenuId === session.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]`}
+                         className={`absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded transition-opacity ${openMenuId === session.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} text-(--text-muted) hover:bg-(--bg-hover) hover:text-(--text-primary)`}
                        >
                          <MoreHorizontal className="w-3.5 h-3.5" />
                        </button>
@@ -350,18 +350,18 @@ function Sidebar() {
                        {openMenuId === session.id && (
                          <div
                            ref={sessionMenuRef}
-                           className="absolute right-8 top-full -mt-2 w-32 rounded border border-[var(--border-strong)] bg-[var(--bg-elevated)] shadow-xl py-1 z-60 overflow-hidden"
+                           className="absolute right-8 top-full -mt-2 w-32 rounded border border-(--border-strong) bg-(--bg-elevated) shadow-xl py-1 z-60 overflow-hidden"
                          >
                            <button
                              onClick={(e) => openRenameModal(e, session)}
-                             className="w-full text-left px-3 py-2 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] flex items-center gap-2 transition-colors"
+                             className="w-full text-left px-3 py-2 text-xs text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--text-primary) flex items-center gap-2 transition-colors"
                              style={{ fontFamily: 'var(--font-mono)' }}
                            >
                              <Edit2 className="w-3.5 h-3.5" /> Rename
                            </button>
                            <button
                              onClick={(e) => openDeleteModal(e, session)}
-                             className="w-full text-left px-3 py-2 text-xs text-[var(--accent-red)] hover:bg-[var(--accent-red-dim)] flex items-center gap-2 transition-colors"
+                             className="w-full text-left px-3 py-2 text-xs text-(--accent-red) hover:bg-(--accent-red-dim) flex items-center gap-2 transition-colors"
                              style={{ fontFamily: 'var(--font-mono)' }}
                            >
                              <Trash2 className="w-3.5 h-3.5" /> Delete
@@ -378,23 +378,23 @@ function Sidebar() {
       </div>
 
       {/* Bottom User Menu */}
-      <div className="p-2 border-t border-[var(--border-subtle)]">
+      <div className="p-2 border-t border-(--border-subtle)">
         <div className="relative w-full">
           {/* Dropdown Menu (Opens Upward) */}
           {userMenuOpen && (
-            <div className={`absolute bottom-full mb-2 rounded border border-[var(--border-strong)] py-1 z-50 bg-[var(--bg-elevated)] shadow-xl ${
+            <div className={`absolute bottom-full mb-2 rounded border border-(--border-strong) py-1 z-50 bg-(--bg-elevated) shadow-xl ${
               isCollapsed ? 'left-full ml-3 w-56' : 'left-0 w-56'
             }`}>
 
               {/* Email Display */}
-              <div className="px-4 py-3 text-xs truncate border-b border-[var(--border-subtle)] text-[var(--text-muted)]" style={{ fontFamily: 'var(--font-mono)' }}>
+              <div className="px-4 py-3 text-xs truncate border-b border-(--border-subtle) text-(--text-muted)" style={{ fontFamily: 'var(--font-mono)' }}>
                 {user?.email || 'No email available'}
               </div>
 
               {/* Settings */}
               <button
                 onClick={handleSettings}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--text-primary) transition-colors"
               >
                 <Settings className="w-4 h-4" />
                 Settings
@@ -403,7 +403,7 @@ function Sidebar() {
               {/* Profile */}
               <button
                 onClick={handleManageAccount}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--text-primary) transition-colors"
               >
                 <UserIcon className="w-4 h-4" />
                 Profile
@@ -411,7 +411,7 @@ function Sidebar() {
 
               {/* Theme Submenu Toggle */}
               <div
-                className="relative w-full flex items-center justify-between px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                className="relative w-full flex items-center justify-between px-4 py-2.5 text-sm text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--text-primary) transition-colors cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation()
                   setThemeSubmenuOpen(!themeSubmenuOpen)
@@ -425,7 +425,7 @@ function Sidebar() {
 
                 {/* Theme Submenu */}
                 {themeSubmenuOpen && (
-                  <div className={`absolute bottom-0 rounded border border-[var(--border-strong)] py-1 z-50 w-36 bg-[var(--bg-elevated)] shadow-xl ${
+                  <div className={`absolute bottom-0 rounded border border-(--border-strong) py-1 z-50 w-36 bg-(--bg-elevated) shadow-xl ${
                     isCollapsed ? 'left-full ml-1' : 'left-full ml-1'
                   }`}>
                     {themeOptions.map((option) => {
@@ -435,13 +435,13 @@ function Sidebar() {
                         <button
                           key={option.value}
                           onClick={() => handleThemeChange(option.value)}
-                          className="w-full flex items-center justify-between px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors"
+                          className="w-full flex items-center justify-between px-4 py-2 text-sm text-(--text-secondary) hover:bg-(--bg-hover) hover:text-(--text-primary) transition-colors"
                         >
                           <div className="flex items-center gap-3">
                             <Icon className="w-4 h-4" />
                             {option.label}
                           </div>
-                          {isSelected && <Check className="w-4 h-4 text-[var(--accent-cyan)]" />}
+                          {isSelected && <Check className="w-4 h-4 text-(--accent-cyan)" />}
                         </button>
                       )
                     })}
@@ -452,7 +452,7 @@ function Sidebar() {
               {/* Logout */}
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--accent-red)] border-t border-[var(--border-subtle)] hover:bg-[var(--accent-red-dim)] transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-(--accent-red) border-t border-(--border-subtle) hover:bg-(--accent-red-dim) transition-colors"
               >
                 <LogOut className="w-4 h-4" />
                 Log out
@@ -463,9 +463,9 @@ function Sidebar() {
           {/* User Button (Avatar & Name) */}
           <button
             onClick={() => setUserMenuOpen(!userMenuOpen)}
-            className={`w-full flex items-center gap-2 p-1.5 rounded hover:bg-[var(--bg-hover)] transition-colors ${isCollapsed ? 'justify-center' : 'justify-start'}`}
+            className={`w-full flex items-center gap-2 p-1.5 rounded hover:bg-(--bg-hover) transition-colors ${isCollapsed ? 'justify-center' : 'justify-start'}`}
           >
-            <div className="w-7 h-7 rounded-full overflow-hidden shrink-0 border border-[var(--border-default)]">
+            <div className="w-7 h-7 rounded-full overflow-hidden shrink-0 border border-(--border-default)">
               <img
                 src={avatarUrl}
                 alt="Avatar"
@@ -474,10 +474,10 @@ function Sidebar() {
             </div>
             {!isCollapsed && (
               <>
-                <span className="text-xs font-medium truncate flex-1 text-left text-[var(--text-secondary)]" style={{ fontFamily: 'var(--font-mono)' }}>
+                <span className="text-xs font-medium truncate flex-1 text-left text-(--text-secondary)" style={{ fontFamily: 'var(--font-mono)' }}>
                   {displayName}
                 </span>
-                <ChevronDown className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+                <ChevronDown className="w-3.5 h-3.5 text-(--text-muted)" />
               </>
             )}
           </button>
@@ -495,11 +495,11 @@ function Sidebar() {
       {modalConfig.type && (
         <div className="modal-backdrop">
           <div className="modal-box">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)]">
-              <h3 className="text-sm font-semibold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-(--border-subtle)">
+              <h3 className="text-sm font-semibold text-(--text-primary)" style={{ fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                 {modalConfig.type === 'rename' ? 'Rename Chat' : 'Delete Chat'}
               </h3>
-              <button onClick={closeModals} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
+              <button onClick={closeModals} className="text-(--text-muted) hover:text-(--text-primary) transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -519,13 +519,13 @@ function Sidebar() {
                   />
                 </div>
               ) : (
-                <p className="text-[var(--text-secondary)] text-sm">
-                  Are you sure you want to delete <span className="font-semibold text-[var(--text-primary)]">"{modalConfig.session.title}"</span>? This action cannot be undone.
+                <p className="text-(--text-secondary) text-sm">
+                  Are you sure you want to delete <span className="font-semibold text-(--text-primary)">"{modalConfig.session.title}"</span>? This action cannot be undone.
                 </p>
               )}
             </div>
 
-            <div className="px-6 py-4 bg-[var(--bg-surface)] border-t border-[var(--border-subtle)] flex justify-end gap-3">
+            <div className="px-6 py-4 bg-(--bg-surface) border-t border-(--border-subtle) flex justify-end gap-3">
               <button
                 onClick={closeModals}
                 className="btn-ghost"

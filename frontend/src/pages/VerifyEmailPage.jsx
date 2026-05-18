@@ -58,29 +58,29 @@ function VerifyEmailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center p-4">
-      <div className="bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded-md w-full max-w-md overflow-hidden shadow-xl">
+    <div className="min-h-screen bg-(--bg-base) flex items-center justify-center p-4">
+      <div className="bg-(--bg-elevated) border border-(--border-strong) rounded-md w-full max-w-md overflow-hidden shadow-xl">
         <div className="p-8 text-center">
           {verificationStatus === 'pending' && (
             <>
-              <Mail className="w-12 h-12 text-[var(--accent-cyan)] mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
+              <Mail className="w-12 h-12 text-(--accent-cyan) mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-(--text-primary) mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
                 Verify Your Email
               </h2>
-              <p className="text-[var(--text-secondary)] mb-4 text-sm">
+              <p className="text-(--text-secondary) mb-4 text-sm">
                 We've sent a verification link to your email address. Please check your inbox and verify your email.
               </p>
 
               <button
                 onClick={() => setShowResend(!showResend)}
-                className="text-[var(--accent-cyan)] hover:underline text-sm mb-4"
+                className="text-(--accent-cyan) hover:underline text-sm mb-4"
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
                 {showResend ? 'Hide' : 'Didn\'t receive email?'}
               </button>
 
               {showResend && (
-                <form onSubmit={handleResendEmail} className="space-y-3 mt-4 pt-4 border-t border-[var(--border-subtle)] text-left">
+                <form onSubmit={handleResendEmail} className="space-y-3 mt-4 pt-4 border-t border-(--border-subtle) text-left">
                   <input
                     type="email"
                     value={email}
@@ -101,11 +101,11 @@ function VerifyEmailPage() {
 
           {verificationStatus === 'success' && (
             <>
-              <CheckCircle className="w-12 h-12 text-[var(--accent-cyan)] mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
+              <CheckCircle className="w-12 h-12 text-(--accent-cyan) mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-(--text-primary) mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
                 Email Verified!
               </h2>
-              <p className="text-[var(--text-secondary)] mb-6 text-sm">
+              <p className="text-(--text-secondary) mb-6 text-sm">
                 Your email has been verified successfully. You can now login to your account.
               </p>
               <button
@@ -119,11 +119,11 @@ function VerifyEmailPage() {
 
           {verificationStatus === 'error' && (
             <>
-              <AlertCircle className="w-12 h-12 text-[var(--accent-red)] mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
+              <AlertCircle className="w-12 h-12 text-(--accent-red) mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-(--text-primary) mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
                 Verification Failed
               </h2>
-              <p className="text-[var(--text-secondary)] mb-6 text-sm">
+              <p className="text-(--text-secondary) mb-6 text-sm">
                 The verification link is invalid or has expired. Please try again.
               </p>
 
@@ -135,7 +135,7 @@ function VerifyEmailPage() {
               </button>
 
               {showResend && (
-                <form onSubmit={handleResendEmail} className="space-y-3 mt-4 pt-4 border-t border-[var(--border-subtle)] text-left">
+                <form onSubmit={handleResendEmail} className="space-y-3 mt-4 pt-4 border-t border-(--border-subtle) text-left">
                   <input
                     type="email"
                     value={email}
@@ -154,7 +154,7 @@ function VerifyEmailPage() {
 
               <button
                 onClick={() => navigate('/auth')}
-                className="w-full text-[var(--accent-cyan)] hover:underline text-sm font-medium py-2 px-4 mt-3"
+                className="w-full text-(--accent-cyan) hover:underline text-sm font-medium py-2 px-4 mt-3"
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
                 Back to Login

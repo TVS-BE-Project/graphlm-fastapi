@@ -86,12 +86,12 @@ export default function AvatarUploadModal({ open, onClose, avatarUrl, displayNam
 
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/70 px-4">
-      <div className="w-full max-w-md rounded border border-[var(--border-strong)] bg-[var(--bg-elevated)] p-6 shadow-2xl">
+      <div className="w-full max-w-md rounded border border-(--border-strong) bg-(--bg-elevated) p-6 shadow-2xl">
         <div className="flex items-start justify-between mb-6">
-          <h3 className="text-sm font-semibold text-[var(--text-primary)] uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)' }}>Edit profile</h3>
+          <h3 className="text-sm font-semibold text-(--text-primary) uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)' }}>Edit profile</h3>
           <button
             onClick={onClose}
-            className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors text-sm"
+            className="text-(--text-muted) hover:text-(--text-primary) transition-colors text-sm"
             aria-label="Close"
           >
             ✕
@@ -100,14 +100,14 @@ export default function AvatarUploadModal({ open, onClose, avatarUrl, displayNam
 
         <div className="flex flex-col items-center gap-5">
           <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-            <div className="h-20 w-20 overflow-hidden rounded-full border-2 border-[var(--border-default)] relative">
+            <div className="h-20 w-20 overflow-hidden rounded-full border-2 border-(--border-default) relative">
               {previewUrl ? (
                 <img src={previewUrl} alt="preview" className="h-full w-full object-cover" />
               ) : (
                 <img src={avatarUrl} alt={displayName} className="h-full w-full object-cover" />
               )}
               <div className="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center transition-colors rounded-full">
-                <Camera className="w-5 h-5 text-[var(--accent-cyan)]" />
+                <Camera className="w-5 h-5 text-(--accent-cyan)" />
               </div>
             </div>
             <input
@@ -138,7 +138,7 @@ export default function AvatarUploadModal({ open, onClose, avatarUrl, displayNam
                 onChange={(e) => setUsername(e.target.value)}
                 className="field-input"
               />
-              <p className="mt-1.5 text-xs text-[var(--text-muted)]" style={{ fontFamily: 'var(--font-mono)' }}>
+              <p className="mt-1.5 text-xs text-(--text-muted)" style={{ fontFamily: 'var(--font-mono)' }}>
                 Your profile helps people recognize you in group chats.
               </p>
             </div>

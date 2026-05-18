@@ -138,25 +138,25 @@ function Chat() {
   }, [currentSession, sourceProgress]);
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-[var(--bg-base)]">
+    <div className="flex h-full min-h-0 flex-col bg-(--bg-base)">
       {/* Top Header */}
-      <div className="border-b border-[var(--border-subtle)] px-4 py-2 flex items-center justify-between bg-[var(--bg-surface)] shrink-0">
+      <div className="border-b border-(--border-subtle) px-4 py-2 flex items-center justify-between bg-(--bg-surface) shrink-0">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/dashboard')}
-            className="group relative flex items-center justify-center p-1.5 rounded text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
+            className="group relative flex items-center justify-center p-1.5 rounded text-(--text-muted) hover:text-(--text-primary) hover:bg-(--bg-hover) transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            <div className="absolute top-full mt-2 px-2 py-1 bg-[var(--bg-elevated)] text-[var(--text-primary)] text-xs rounded border border-[var(--border-default)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none" style={{ fontFamily: 'var(--font-mono)' }}>
+            <div className="absolute top-full mt-2 px-2 py-1 bg-(--bg-elevated) text-(--text-primary) text-xs rounded border border-(--border-default) opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none" style={{ fontFamily: 'var(--font-mono)' }}>
               Back to Dashboard
             </div>
           </button>
 
           <div className="flex flex-col">
-            <h1 className="text-sm font-medium text-[var(--text-primary)] leading-tight" style={{ fontFamily: 'var(--font-mono)' }}>
+            <h1 className="text-sm font-medium text-(--text-primary) leading-tight" style={{ fontFamily: 'var(--font-mono)' }}>
               {currentSession?.title || 'Loading session...'}
             </h1>
-            <span className="text-xs text-[var(--text-muted)]" style={{ fontFamily: 'var(--font-mono)' }}>
+            <span className="text-xs text-(--text-muted)" style={{ fontFamily: 'var(--font-mono)' }}>
               {currentSession?.sources?.length || 0} sources · {currentSession?.created_at ? new Date(currentSession.created_at).toLocaleDateString() : 'Today'}
             </span>
           </div>
@@ -166,23 +166,23 @@ function Chat() {
       <div className="flex-1 min-h-0 overflow-hidden flex">
         {/* Collapsed Sources Toolbar */}
         {!isSourcesOpen && (
-          <div className="w-14 shrink-0 h-full bg-[var(--bg-surface)] border-r border-[var(--border-subtle)] flex flex-col items-center py-3 gap-3">
+          <div className="w-14 shrink-0 h-full bg-(--bg-surface) border-r border-(--border-subtle) flex flex-col items-center py-3 gap-3">
             <button
               onClick={() => setIsSourcesOpen(true)}
-              className="group relative p-2 rounded text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
+              className="group relative p-2 rounded text-(--text-muted) hover:text-(--text-primary) hover:bg-(--bg-hover) transition-colors"
             >
               <PanelLeftOpen className="w-4 h-4" />
-              <div className="absolute left-full ml-3 px-2 py-1 bg-[var(--bg-elevated)] text-[var(--text-primary)] text-xs rounded border border-[var(--border-default)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none" style={{ fontFamily: 'var(--font-mono)' }}>
+              <div className="absolute left-full ml-3 px-2 py-1 bg-(--bg-elevated) text-(--text-primary) text-xs rounded border border-(--border-default) opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none" style={{ fontFamily: 'var(--font-mono)' }}>
                 Open Sources
               </div>
             </button>
             <div className="flex flex-col gap-2 w-full px-2">
               <button
                 onClick={() => setIsAddModalOpen(true)}
-                className="group relative p-2 rounded bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--accent-cyan)] hover:bg-[var(--accent-cyan-dim)] flex items-center justify-center transition-colors"
+                className="group relative p-2 rounded bg-(--bg-elevated) text-(--text-muted) hover:text-(--accent-cyan) hover:bg-(--accent-cyan-dim) flex items-center justify-center transition-colors"
               >
                 <span className="text-base leading-none">+</span>
-                <div className="absolute left-full ml-3 px-2 py-1 bg-[var(--bg-elevated)] text-[var(--text-primary)] text-xs rounded border border-[var(--border-default)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none" style={{ fontFamily: 'var(--font-mono)' }}>
+                <div className="absolute left-full ml-3 px-2 py-1 bg-(--bg-elevated) text-(--text-primary) text-xs rounded border border-(--border-default) opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none" style={{ fontFamily: 'var(--font-mono)' }}>
                   Add Source
                 </div>
               </button>
@@ -190,14 +190,14 @@ function Chat() {
                 <div
                   key={s.id}
                   onClick={() => handleOpenSource(s)}
-                  className="group relative w-full aspect-square rounded bg-[var(--bg-elevated)] flex items-center justify-center cursor-pointer hover:bg-[var(--bg-hover)] transition-colors"
+                  className="group relative w-full aspect-square rounded bg-(--bg-elevated) flex items-center justify-center cursor-pointer hover:bg-(--bg-hover) transition-colors"
                 >
                   {s.type === 'github' ? (
-                    <GitBranch className="w-4 h-4 text-[var(--text-muted)]" />
+                    <GitBranch className="w-4 h-4 text-(--text-muted)" />
                   ) : (
                     <FileIcon filename={s.title} className="w-4 h-4" />
                   )}
-                  <div className="absolute left-full ml-3 px-2 py-1 bg-[var(--bg-elevated)] text-[var(--text-primary)] text-xs rounded border border-[var(--border-default)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none" style={{ fontFamily: 'var(--font-mono)' }}>
+                  <div className="absolute left-full ml-3 px-2 py-1 bg-(--bg-elevated) text-(--text-primary) text-xs rounded border border-(--border-default) opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none" style={{ fontFamily: 'var(--font-mono)' }}>
                     {s.title}
                   </div>
                 </div>
@@ -223,7 +223,7 @@ function Chat() {
                     isGraphViewOpen={activeCanvasTool === 'graph'}
                   />
                 </Panel>
-                <PanelResizeHandle className="w-px bg-[var(--border-subtle)] hover:bg-[var(--accent-cyan)] active:bg-[var(--accent-cyan)] transition-colors cursor-col-resize z-10" />
+                <PanelResizeHandle className="w-px bg-(--border-subtle) hover:bg-(--accent-cyan) active:bg-(--accent-cyan) transition-colors cursor-col-resize z-10" />
               </>
             )}
 
@@ -239,7 +239,7 @@ function Chat() {
             {/* Panel 3: Studio */}
             {isStudioOpen && (
               <>
-                <PanelResizeHandle className="w-px bg-[var(--border-subtle)] hover:bg-[var(--accent-cyan)] active:bg-[var(--accent-cyan)] transition-colors cursor-col-resize z-10" />
+                <PanelResizeHandle className="w-px bg-(--border-subtle) hover:bg-(--accent-cyan) active:bg-(--accent-cyan) transition-colors cursor-col-resize z-10" />
                 <Panel defaultSize="30" minSize="20" maxSize="50">
                   <StudioPanel
                     onCollapse={() => setIsStudioOpen(false)}
@@ -255,20 +255,20 @@ function Chat() {
 
         {/* Collapsed Studio Toolbar */}
         {!isStudioOpen && (
-          <div className="w-14 shrink-0 h-full bg-[var(--bg-surface)] border-l border-[var(--border-subtle)] flex flex-col items-center py-3 gap-3">
+          <div className="w-14 shrink-0 h-full bg-(--bg-surface) border-l border-(--border-subtle) flex flex-col items-center py-3 gap-3">
             <button
               onClick={() => setIsStudioOpen(true)}
-              className="group relative p-2 rounded text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
+              className="group relative p-2 rounded text-(--text-muted) hover:text-(--text-primary) hover:bg-(--bg-hover) transition-colors"
             >
               <PanelRightOpen className="w-4 h-4" />
-              <div className="absolute right-full mr-3 px-2 py-1 bg-[var(--bg-elevated)] text-[var(--text-primary)] text-xs rounded border border-[var(--border-default)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none" style={{ fontFamily: 'var(--font-mono)' }}>
+              <div className="absolute right-full mr-3 px-2 py-1 bg-(--bg-elevated) text-(--text-primary) text-xs rounded border border-(--border-default) opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none" style={{ fontFamily: 'var(--font-mono)' }}>
                 Open Studio
               </div>
             </button>
             <div className="flex flex-col gap-2 w-full px-2">
-               <div className="group relative w-full aspect-square rounded bg-[var(--bg-elevated)] flex items-center justify-center text-[var(--accent-cyan)] cursor-pointer hover:bg-[var(--accent-cyan-dim)] transition-colors">
+               <div className="group relative w-full aspect-square rounded bg-(--bg-elevated) flex items-center justify-center text-(--accent-cyan) cursor-pointer hover:bg-(--accent-cyan-dim) transition-colors">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 3h5v5"/><path d="M21 3 9 15"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>
-                  <div className="absolute right-full mr-3 px-2 py-1 bg-[var(--bg-elevated)] text-[var(--text-primary)] text-xs rounded border border-[var(--border-default)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none" style={{ fontFamily: 'var(--font-mono)' }}>
+                  <div className="absolute right-full mr-3 px-2 py-1 bg-(--bg-elevated) text-(--text-primary) text-xs rounded border border-(--border-default) opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none" style={{ fontFamily: 'var(--font-mono)' }}>
                     Graph Tools
                   </div>
                </div>

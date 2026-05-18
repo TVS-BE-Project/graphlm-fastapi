@@ -5,10 +5,43 @@
    DESIGN TOKENS
 ───────────────────────────────────────────────────────────── */
 :root {
+  /* Light Theme */
+  --bg-base: #F9FAFB;
+  --bg-surface: #FFFFFF;
+  --bg-elevated: #F3F4F6;
+  --bg-hover: #E5E7EB;
+  --bg-subtle: rgba(0, 0, 0, 0.03);
+
+  --border-subtle: rgba(0, 0, 0, 0.12);
+  --border-default: rgba(0, 0, 0, 0.25);
+  --border-strong: rgba(0, 0, 0, 0.35);
+
+  --text-primary: #111827;
+  --text-secondary: #4B5563;
+  --text-muted: #9CA3AF;
+  --text-inverse: #FFFFFF;
+
+  --accent-cyan: #00C896;
+  --accent-cyan-dim: rgba(0, 200, 150, 0.12);
+  --accent-amber: #F59E0B;
+  --accent-amber-dim: rgba(245, 158, 11, 0.12);
+  --accent-red: #EF4444;
+  --accent-red-dim: rgba(239, 68, 68, 0.12);
+
+  --scrollbar-thumb: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
+
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'IBM Plex Sans', sans-serif;
+}
+
+.dark {
+  /* Dark Theme */
   --bg-base: #0C0C0E;
   --bg-surface: #111113;
   --bg-elevated: #18181C;
   --bg-hover: #1E1E24;
+  --bg-subtle: rgba(255, 255, 255, 0.05);
 
   --border-subtle: rgba(255, 255, 255, 0.06);
   --border-default: rgba(255, 255, 255, 0.10);
@@ -26,8 +59,8 @@
   --accent-red: #F87171;
   --accent-red-dim: rgba(248, 113, 113, 0.12);
 
-  --font-mono: 'JetBrains Mono', monospace;
-  --font-sans: 'IBM Plex Sans', sans-serif;
+  --scrollbar-thumb: rgba(255, 255, 255, 0.12);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.2);
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -53,7 +86,7 @@ html, body {
    SCROLLBARS
 ───────────────────────────────────────────────────────────── */
 html {
-  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
   scrollbar-width: thin;
 }
 
@@ -67,12 +100,12 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--scrollbar-thumb);
   border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -132,7 +165,7 @@ html {
 }
 
 .badge-uploaded {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-subtle);
   color: var(--text-muted);
   border: 1px solid var(--border-default);
 }

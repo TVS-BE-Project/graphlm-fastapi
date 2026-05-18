@@ -54,16 +54,16 @@ function EmailVerifiedPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center p-4">
-      <div className="bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded-md w-full max-w-md overflow-hidden shadow-xl">
+    <div className="min-h-screen bg-(--bg-base) flex items-center justify-center p-4">
+      <div className="bg-(--bg-elevated) border border-(--border-strong) rounded-md w-full max-w-md overflow-hidden shadow-xl">
         <div className="p-8 text-center">
           {verificationStatus === 'pending' && (
             <>
-              <Mail className="w-12 h-12 text-[var(--accent-cyan)] mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
+              <Mail className="w-12 h-12 text-(--accent-cyan) mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-(--text-primary) mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
                 Verifying Your Email
               </h2>
-              <p className="text-[var(--text-secondary)] mb-4 text-sm">
+              <p className="text-(--text-secondary) mb-4 text-sm">
                 Please wait while we verify your email address...
               </p>
             </>
@@ -71,11 +71,11 @@ function EmailVerifiedPage() {
 
           {verificationStatus === 'success' && (
             <>
-              <CheckCircle className="w-12 h-12 text-[var(--accent-cyan)] mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
+              <CheckCircle className="w-12 h-12 text-(--accent-cyan) mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-(--text-primary) mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
                 Email Verified!
               </h2>
-              <p className="text-[var(--text-secondary)] mb-6 text-sm">
+              <p className="text-(--text-secondary) mb-6 text-sm">
                 Your email has been verified successfully. You can now login to your account.
               </p>
               <button
@@ -89,11 +89,11 @@ function EmailVerifiedPage() {
 
           {verificationStatus === 'error' && (
             <>
-              <AlertCircle className="w-12 h-12 text-[var(--accent-red)] mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
+              <AlertCircle className="w-12 h-12 text-(--accent-red) mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-(--text-primary) mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
                 Verification Failed
               </h2>
-              <p className="text-[var(--text-secondary)] mb-6 text-sm">
+              <p className="text-(--text-secondary) mb-6 text-sm">
                 The verification link is invalid or has expired. Please request a new verification email.
               </p>
 
@@ -105,7 +105,7 @@ function EmailVerifiedPage() {
               </button>
 
               {showResend && (
-                <form onSubmit={handleResendEmail} className="space-y-3 mt-4 pt-4 border-t border-[var(--border-subtle)]">
+                <form onSubmit={handleResendEmail} className="space-y-3 mt-4 pt-4 border-t border-(--border-subtle)">
                   <input
                     type="email"
                     value={email}
@@ -124,7 +124,7 @@ function EmailVerifiedPage() {
 
               <button
                 onClick={() => navigate('/auth?mode=login')}
-                className="w-full text-[var(--accent-cyan)] hover:underline text-sm font-medium py-2 px-4 mt-3"
+                className="w-full text-(--accent-cyan) hover:underline text-sm font-medium py-2 px-4 mt-3"
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
                 Back to Login
