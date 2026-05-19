@@ -14,7 +14,7 @@ services:
     volumes:
       - neo4j_data:/data
     environment:
-      NEO4J_AUTH: neo4j/reform-william-center-vibrate-press-5829
+      NEO4J_AUTH: ${NEO4J_USERNAME:-neo4j}/${NEO4J_PASSWORD:-reform-william-center-vibrate-press-5829}
       NEO4JLABS_PLUGINS: '["apoc"]'
       NEO4J_dbms_security_procedures_unrestricted: 'apoc.*,apoc.meta.*'
       NEO4J_dbms_security_procedures_allowlist: 'apoc.*,apoc.meta.*'
@@ -25,9 +25,9 @@ services:
     image: postgres:16
     container_name: my-postgres
     environment:
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-      POSTGRES_DB: graphlm
+      POSTGRES_USER: ${POSTGRES_USER:-myuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mypassword}
+      POSTGRES_DB: ${POSTGRES_DB:-graphlm}
     ports:
       - "5433:5432"
     volumes:
