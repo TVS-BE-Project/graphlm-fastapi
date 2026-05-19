@@ -6,7 +6,18 @@ Prevents accidental exposure of sensitive information in API responses.
 """
 
 from typing import Dict, Any
+from urllib.parse import quote_plus
 from app.models.user import User
+
+
+def build_initials_avatar_url(name: str | None) -> dict:
+    """Build a ui-avatars.com avatar dict from a full name."""
+    if name and name.strip():
+        encoded = quote_plus(name.strip())
+        url = f"https://ui-avatars.com/api/?name={encoded}&background=E8E8EC&color=000000&size=200&bold=false&length=2"
+    else:
+        url = "https://placehold.co/600x400"
+    return {"url": url, "public_id": ""}
 
 
 def get_public_user_data(user: User) -> Dict[str, Any]:

@@ -24,6 +24,7 @@ from app.repositories.user_repo import (
     get_user_by_username,
     update_user,
 )
+from app.utils.user_utils import build_initials_avatar_url
 
 
 async def exchange_code_for_token(code: str) -> str:
@@ -241,7 +242,7 @@ async def handle_github_oauth(db: Session, code: str) -> User:
             auth_provider="github",
             is_email_verified=True,  # GitHub already verified the email
             avatar={
-                "url": avatar_url or "https://placehold.co/600x400",
+                "url": avatar_url or build_initials_avatar_url(name or login)["url"],
                 "public_id": ""
             },
         )

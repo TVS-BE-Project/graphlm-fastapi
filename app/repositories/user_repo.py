@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 from app.schemas.user import UserRegister
 from app.utils.logger import logger
+from app.utils.user_utils import build_initials_avatar_url
 
 
 def get_user_by_id(db: Session, user_id: int) -> Optional[User]:
@@ -80,19 +81,23 @@ def create_user(db: Session, user_data: Union[UserRegister, dict], hashed_passwo
         - Services should handle duplicate key errors
     """
     if isinstance(user_data, UserRegister):
+        fullname = user_data.fullname
         new_user = User(
-            fullname=user_data.fullname,
+            fullname=fullname,
             username=user_data.username,
             email=user_data.email,
             hashed_password=hashed_password,
+            avatar=build_initials_avatar_url(fullname),
         )
     else:
         # Handle dict input
+        fullname = user_data.get("fullname")
         new_user = User(
-            fullname=user_data.get("fullname"),
+            fullname=fullname,
             username=user_data.get("username"),
             email=user_data.get("email"),
             hashed_password=hashed_password,
+            avatar=build_initials_avatar_url(fullname),
         )
 
     db.add(new_user)

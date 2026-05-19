@@ -202,7 +202,7 @@ function AuthPage() {
 
         {/* Footer */}
         <p className="relative z-10 text-[11px] text-(--text-muted) font-mono">
-          BE Final Project · AISSMS IOIT · 2026
+          BE Final Project · AISSMS IOIT · AI & DS Group 8 · 2026
         </p>
       </div>
 
