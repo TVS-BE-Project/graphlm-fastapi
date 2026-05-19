@@ -118,7 +118,7 @@ function Dashboard() {
   }
 
   return (
-    <div className="px-8 py-8 max-w-7xl mx-auto h-full flex flex-col relative">
+    <div className="px-8 py-8 max-w-7xl mx-auto">
 
       {/* ── Hero greeting ── */}
       <div className="mb-8">
@@ -243,8 +243,7 @@ function Dashboard() {
       </div>
 
       {/* Recent Chats Section */}
-      <div className="flex-1 overflow-auto pb-10">
-        <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between mb-5">
           <h2 className="text-xs font-medium text-(--text-muted) uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)' }}>Recent chats</h2>
           {!isLoadingSessions && sessions.length > 0 && (
             <span className="text-[11px] text-(--text-muted) font-mono">{filteredSessions.length}/{sessions.length}</span>
@@ -380,7 +379,73 @@ function Dashboard() {
             ))
           )}
         </div>
-      </div>
+
+        {/* ── About GraphLM ── */}
+        <div className="mt-16 border-t border-[var(--border-subtle)] pt-10 pb-6">
+        <p className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-[0.18em] mb-10">About GraphLM</p>
+
+        {/* Row 1 — 3 columns */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
+
+          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-6">
+            <p className="text-[10px] font-mono text-[var(--accent-cyan)] uppercase tracking-widest mb-3">The Product</p>
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed" style={{ fontFamily: 'var(--font-sans)' }}>
+              GraphLM turns your documents into a living, queryable knowledge graph. Attach a PDF, a GitHub repository, or a URL — and instead of a flat search index, you get an intelligent structure where facts, entities, and relationships are first-class citizens. Ask it anything. It doesn't retrieve keywords; it understands context.
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-6">
+            <p className="text-[10px] font-mono text-[var(--accent-cyan)] uppercase tracking-widest mb-3">The Idea</p>
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed" style={{ fontFamily: 'var(--font-sans)' }}>
+              Vanilla RAG retrieves semantically similar chunks — but documents aren't flat collections of facts. A research paper, a codebase, a legal brief — all carry rich relational structure that embeddings quietly flatten and discard. GraphLM was born from one question: what if an AI could navigate your documents the way a graph database navigates data, preserving every relationship, not just every sentence?
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-6">
+            <p className="text-[10px] font-mono text-[var(--accent-cyan)] uppercase tracking-widest mb-3">The Stack</p>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                'FastAPI', 'PostgreSQL', 'SQLAlchemy', 'Alembic',
+                'Qdrant', 'Neo4j', 'LlamaIndex', 'OpenAI GPT-4o-mini',
+                'OpenAI Agents SDK', 'Mem0', 'React 19', 'Vite',
+                'TailwindCSS v4', 'Zustand 5', 'vis-network',
+                'Cloudinary', 'GitHub OAuth',
+              ].map(t => (
+                <span
+                  key={t}
+                  className="px-2 py-0.5 rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-muted)]"
+                  style={{ fontFamily: 'var(--font-mono)', fontSize: '11px' }}
+                >
+                  {t}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Row 2 — 2 columns */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-6">
+            <p className="text-[10px] font-mono text-[var(--accent-cyan)] uppercase tracking-widest mb-3">How It Works</p>
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed" style={{ fontFamily: 'var(--font-sans)' }}>
+              Every document you attach is processed through a dual-index pipeline — a vector index in Qdrant for semantic similarity, and a knowledge graph in Neo4j where entities, concepts, and their relationships are extracted and stored as nodes and edges. At query time, both indexes are consulted simultaneously: the graph provides structured relational grounding while the vector index surfaces the most contextually relevant passages. The OpenAI Agents SDK orchestrates the retrieval-generation loop, and Mem0 gives the agent persistent memory across sessions so context doesn't evaporate between conversations.
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-6">
+            <p className="text-[10px] font-mono text-[var(--accent-cyan)] uppercase tracking-widest mb-3">How It Came to Life</p>
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed" style={{ fontFamily: 'var(--font-sans)' }}>
+              GraphLM started as a final-year BE project — a deliberate attempt to build something at the genuine intersection of knowledge representation and generative AI, not just another wrapper around an LLM. The architecture was designed production-grade from the first commit: real-time indexing status via PostgreSQL <span className="font-mono text-[var(--text-primary)] text-xs">LISTEN/NOTIFY</span>, JWT authentication with refresh tokens, GitHub OAuth, per-user rate limiting, and a streaming chat interface built with SSE. What began as a thesis became a system that can answer questions no flat-file search engine ever could — grounded, relational, honest about its sources.
+            </p>
+          </div>
+
+        </div>
+
+        <p className="mt-12 text-[11px] text-[var(--text-muted)] font-mono text-center" style={{ opacity: 0.35, letterSpacing: '0.12em' }}>
+          GRAPHLM · KNOWLEDGE GRAPH INTELLIGENCE · {new Date().getFullYear()}
+        </p>
+        </div>
 
       {/* Rename / Delete Modals */}
       {modalConfig.type && (
