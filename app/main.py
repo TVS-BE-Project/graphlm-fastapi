@@ -67,7 +67,7 @@ def root():
 if __name__ == "__main__":
     import uvicorn
 
-    from app.utils.logger import logger
+    from app.utils.logger import logger, get_logging_config
 
     port = settings.PORT
     host = settings.HOST
@@ -76,4 +76,4 @@ if __name__ == "__main__":
     logger.info(f"📚 Swagger docs: http://{host}:{port}/docs")
     logger.info(f"📖 ReDoc docs: http://{host}:{port}/redoc")
 
-    uvicorn.run("app.main:app", host=host, port=port, reload=True)
+    uvicorn.run("app.main:app", host=host, port=port, reload=True, ws="wsproto", log_config=get_logging_config())

@@ -1,0 +1,11 @@
+# Indexing & LLM Integration
+langchain
+langchain-community
+langchain-experimental
+langchain-openai
+langchain-qdrant
+langchain-neo4j
+mem0ai
+openai-agents
+python-docx
+qdrant-client
